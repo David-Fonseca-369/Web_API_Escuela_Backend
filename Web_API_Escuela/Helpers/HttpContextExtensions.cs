@@ -20,5 +20,15 @@ namespace Web_API_Escuela.Helpers
             httpContext.Response.Headers.Add("cantidadTotalRegistros", cantidad.ToString());
             //debemos exponer esta cabecera em el startup, ya que no todas las cabeceras se pueden ver.
         }
+
+        public static void InsertarParametrosPaginacionEnCabeceraUsuarios(this HttpContext httpContext, int cantidad)
+        {
+            if (httpContext == null) { throw new ArgumentNullException(nameof(httpContext)); }
+
+            //lo agrego a la cabecera
+            httpContext.Response.Headers.Add("cantidadTotalRegistros", cantidad.ToString());
+            //debemos exponer esta cabecera em el startup, ya que no todas las cabeceras se pueden ver.
+
+        }
     }
 }

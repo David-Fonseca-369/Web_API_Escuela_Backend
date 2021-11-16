@@ -22,10 +22,12 @@ namespace Web_API_Escuela
             modelBuilder.ApplyConfiguration(new GrupoMap());
             modelBuilder.ApplyConfiguration(new PeriodoMap());
             modelBuilder.ApplyConfiguration(new MateriaMap());
+            modelBuilder.ApplyConfiguration(new UsuarioMap());
         }
 
         public DbSet<Grupo> Grupos { get; set; }
         public DbSet<Periodo> Periodos { get; set; }
         public DbSet<Materia> Materias { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }
     }
 }

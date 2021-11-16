@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Web_API_Escuela.Filters;
 
 namespace Web_API_Escuela
 {
@@ -34,7 +35,13 @@ namespace Web_API_Escuela
 
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("defaultConnection")));
 
-            services.AddControllers();
+            //services.AddControllers();
+
+            //Registra el log de errores como filtro global
+            services.AddControllers( options =>
+            {
+                options.Filters.Add(typeof(ExceptionFilter));
+            });
 
             services.AddCors(options => options.AddDefaultPolicy(buider =>
             {

@@ -4,8 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Web_API_Escuela.DTOs;
 using Web_API_Escuela.DTOs.Materia;
 using Web_API_Escuela.Entities;
+using Web_API_Escuela.Helpers;
 
 namespace Web_API_Escuela.Controllers
 {
@@ -38,10 +40,53 @@ namespace Web_API_Escuela.Controllers
 
         }
 
-        //paginacion
+        //GET: api/materias/todosPaginacion
+        [HttpGet("todosPaginacion")]
+        public async Task<ActionResult<List<MateriaDTO>>> TodosPaginacion([FromQuery] PaginacionDTO paginacionDTO)
+        {
+            var queryable = context.Materias.Include(x => x.Grupo).AsQueryable();
+
+            await HttpContext.InsertarParametrosPaginacionEnCabecera(queryable);
+
+            var materias = await queryable.Paginar(paginacionDTO).ToListAsync();
+
+            return materias.Select(x => new MateriaDTO
+            {
+                IdMateria = x.IdMateria,
+                IdGrupo = x.IdGrupo,
+                NombreGrupo = x.Grupo.Nombre,
+                IdDocente = x.IdDocente != null ? Convert.ToInt32(x.IdDocente) : 0,
+                Nombre = x.Nombre,
+                Estado = x.Estado
+
+            }).ToList();
+
+        }
 
 
-        //id
+        //GET: api/materias/{id}
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<MateriaDTO>> Get(int id)
+        {
+            var materia = await context.Materias.Include(x => x.Grupo).FirstOrDefaultAsync(x => x.IdMateria == id);
+
+            if (materia == null)
+            {
+                return NotFound();
+            }
+
+            MateriaDTO materiaDTO = new MateriaDTO
+            {
+                IdMateria = materia.IdMateria,
+                IdGrupo = materia.IdGrupo,
+                NombreGrupo = materia.Grupo.Nombre,
+                IdDocente = materia.IdDocente != null ? Convert.ToInt32(materia.IdDocente) : 0,
+                Nombre = materia.Nombre,
+                Estado = materia.Estado
+            };
+
+            return materiaDTO;
+        }
 
         //POST: api/materias/crear
         [HttpPost("crear")]
@@ -72,13 +117,9 @@ namespace Web_API_Escuela.Controllers
                 return NotFound();
             }
 
-            materia = new Materia
-            {
-                IdGrupo = materiaCreacionDTO.IdGrupo,
-                IdDocente = materiaCreacionDTO.IdDocente,
-                Nombre = materiaCreacionDTO.Nombre,
-                Estado = materiaCreacionDTO.Estado
-            };
+            materia.IdGrupo = materiaCreacionDTO.IdGrupo;
+            materia.Nombre = materiaCreacionDTO.Nombre;
+            materia.Estado = materiaCreacionDTO.Estado;
 
             await context.SaveChangesAsync();
 
@@ -103,7 +144,7 @@ namespace Web_API_Escuela.Controllers
             return NoContent();
 
         }
-        
+
         //PUT: api/materias/desactivar/{id}
         [HttpPut("desactivar/{id:int}")]
         public async Task<ActionResult> Desactivar(int id)
