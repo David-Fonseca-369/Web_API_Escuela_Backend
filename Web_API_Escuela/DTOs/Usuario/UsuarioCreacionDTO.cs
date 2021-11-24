@@ -19,6 +19,7 @@ namespace Web_API_Escuela.DTOs.Usuario
         [EmailAddress]
         public string Correo { get; set; }
         [Required]
+        [MinLength(8, ErrorMessage = "La contraseña debe contener mínimo 8 caracteres.")]
         public string Password { get; set; }
         public bool Estado { get; set; }
     }

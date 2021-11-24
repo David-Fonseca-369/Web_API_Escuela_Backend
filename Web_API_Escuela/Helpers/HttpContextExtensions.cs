@@ -21,7 +21,7 @@ namespace Web_API_Escuela.Helpers
             //debemos exponer esta cabecera em el startup, ya que no todas las cabeceras se pueden ver.
         }
 
-        public static void InsertarParametrosPaginacionEnCabeceraUsuarios(this HttpContext httpContext, int cantidad)
+        public static void InsertarParametrosPaginacionEnCabeceraPersonalizado(this HttpContext httpContext, int cantidad)
         {
             if (httpContext == null) { throw new ArgumentNullException(nameof(httpContext)); }
 

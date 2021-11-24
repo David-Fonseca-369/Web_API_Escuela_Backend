@@ -63,6 +63,58 @@ namespace Web_API_Escuela.Controllers
 
         }
 
+        //GET: api/materias/disponiblesPaginacion
+        [HttpGet("disponiblesPaginacion")]
+        public async Task<ActionResult<List<MateriaDTO>>> DisponiblesPaginacion([FromQuery] PaginacionDTO paginacionDTO) {
+
+            var materiasDisponibles = await context.Materias.Include(x => x.Grupo).Where(x => x.IdDocente == null && x.Estado == true).ToListAsync();
+
+            int cantidad = materiasDisponibles.Count();
+
+            HttpContext.InsertarParametrosPaginacionEnCabeceraPersonalizado(cantidad);
+
+            var queryable = materiasDisponibles.AsQueryable();
+
+            var materiasDisponiblesPaginadas = queryable.Paginar(paginacionDTO).ToList();
+
+
+            return materiasDisponiblesPaginadas.Select(x => new MateriaDTO
+            {
+                IdMateria = x.IdMateria,
+                IdGrupo = x.IdGrupo,
+                NombreGrupo = x.Grupo.Nombre,
+                IdDocente = x.IdDocente != null ? Convert.ToInt32(x.IdDocente) : 0,
+                Nombre = x.Nombre,
+                Estado = x.Estado
+
+            }).ToList();
+        }
+
+        //GET: api/materias/asignadasPaginacion/{idDocente}
+        [HttpGet("asignadasPaginacion/{idDocente}")]
+        public async Task<ActionResult<List<MateriaDTO>>>AsignadasPaginacion([FromQuery]PaginacionDTO paginacionDTO, int idDocente)
+        {
+            var materiasAsignadas = await context.Materias.Include(x => x.Grupo).Where(x => x.IdDocente == idDocente).ToListAsync();
+            int cantidad = materiasAsignadas.Count();
+
+            HttpContext.InsertarParametrosPaginacionEnCabeceraPersonalizado(cantidad);
+
+            var queryable = materiasAsignadas.AsQueryable();
+
+            var materiasAsignadasPaginadas = queryable.Paginar(paginacionDTO).ToList();
+
+            return materiasAsignadasPaginadas.Select(x => new MateriaDTO
+            {
+                IdMateria = x.IdMateria,
+                IdGrupo = x.IdGrupo,
+                NombreGrupo = x.Grupo.Nombre,
+                IdDocente = x.IdDocente != null ? Convert.ToInt32(x.IdDocente) : 0,
+                Nombre = x.Nombre,
+                Estado = x.Estado
+
+            }).ToList();
+        }
+
 
         //GET: api/materias/{id}
         [HttpGet("{id:int}")]
@@ -87,6 +139,7 @@ namespace Web_API_Escuela.Controllers
 
             return materiaDTO;
         }
+        
 
         //POST: api/materias/crear
         [HttpPost("crear")]
@@ -162,6 +215,48 @@ namespace Web_API_Escuela.Controllers
 
             return NoContent();
 
+        }
+
+        //PUT: api/materias/asignar/{idDocente}/{idMateria}
+        [HttpPut("asignar/{idDocente:int}/{idMateria:int}")]
+        public async Task<ActionResult> Asignar(int idDocente, int idMateria)
+        {
+            var materia = await context.Materias.FirstOrDefaultAsync(x => x.IdMateria == idMateria);
+
+            if (materia == null)
+            {
+                return NotFound();
+            }
+
+            //Verificar que la materia no esté asignada
+            if (materia.IdDocente > 0)
+            {
+                return BadRequest("La materia ya ha sido asignadaa otro docente.");
+            }
+
+            materia.IdDocente = idDocente;
+
+            await context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        //PUT: api/materias/quitar/{idMateria}
+        [HttpPut ("quitar/{id:int}")]
+        public async Task<ActionResult> Quitar(int id)
+        {
+            var materia = await context.Materias.FirstOrDefaultAsync(x => x.IdMateria == id);
+
+            if (materia == null)
+            {
+                return NotFound();
+            }
+
+            materia.IdDocente = null;
+
+            await context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

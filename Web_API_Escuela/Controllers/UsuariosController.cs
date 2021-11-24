@@ -49,7 +49,7 @@ namespace Web_API_Escuela.Controllers
         {
             //1 administrador
             //2 docente
-            var docentes = await context.Usuarios.Where(x => x.IdRol == 2).ToListAsync();
+            var docentes = await context.Usuarios.Where(x => x.IdRol == 2 && x.Estado == true).ToListAsync();
 
             return docentes.Select(x => new UsuarioDTO
             {
@@ -59,7 +59,7 @@ namespace Web_API_Escuela.Controllers
                 ApellidoMaterno = x.ApellidoMaterno,
                 Correo = x.Correo,
                 Estado = x.Estado
-            }).ToList();
+            }).OrderBy(x => x.Nombre).ToList();
         }
 
 
@@ -71,7 +71,7 @@ namespace Web_API_Escuela.Controllers
 
             int cantidad = usuarios.Count();
 
-            HttpContext.InsertarParametrosPaginacionEnCabeceraUsuarios(cantidad);
+            HttpContext.InsertarParametrosPaginacionEnCabeceraPersonalizado(cantidad);
 
             var queryable = usuarios.AsQueryable();
 
@@ -88,7 +88,7 @@ namespace Web_API_Escuela.Controllers
             }).ToList();
         }
 
-        //GET: api/usuarios/DocentePaginacion
+        //GET: api/usuarios/DocentesPaginacion
         [HttpGet("DocentesPaginacion")]
         public async Task<ActionResult<List<UsuarioDTO>>> DocentesPaginacion([FromQuery] PaginacionDTO paginacionDTO)
         {
@@ -96,7 +96,7 @@ namespace Web_API_Escuela.Controllers
 
             int cantidad = usuarios.Count();
 
-            HttpContext.InsertarParametrosPaginacionEnCabeceraUsuarios(cantidad);
+            HttpContext.InsertarParametrosPaginacionEnCabeceraPersonalizado(cantidad);
 
             var queryable = usuarios.AsQueryable();
 
@@ -148,11 +148,44 @@ namespace Web_API_Escuela.Controllers
                 return BadRequest("El correo ya existe.");
             }
 
-            CrearPasswordHash(usuarioCreacionDTO.Password, out byte[] passwordHash, out byte[] passwordSalt);
+            Helpers.Helpers.CrearPasswordHash(usuarioCreacionDTO.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
-            Usuario usuario = new Usuario()
+            Usuario usuario = new()
             {
                 IdRol = 2, //Docente
+                Nombre = usuarioCreacionDTO.Nombre,
+                ApellidoPaterno = usuarioCreacionDTO.ApellidoPaterno,
+                ApellidoMaterno = usuarioCreacionDTO.ApellidoMaterno,
+                Correo = usuarioCreacionDTO.Correo.ToLower(),
+                Password_hash = passwordHash,
+                Password_salt = passwordSalt,
+                Estado = true
+            };
+
+            context.Add(usuario);
+
+            await context.SaveChangesAsync();
+
+            return NoContent();
+
+        }
+        
+        //POST: api/usuarios/crearAdministador
+        [HttpPost("CrearAdministrador")]
+        public async Task<ActionResult> CrearAdministrador([FromBody] UsuarioCreacionDTO usuarioCreacionDTO)
+        {
+            //Verificar si el email existe
+            var correo = usuarioCreacionDTO.Correo.ToLower();
+            if (await context.Usuarios.AnyAsync(x => x.Correo == correo))
+            {
+                return BadRequest("El correo ya existe.");
+            }
+
+            Helpers.Helpers.CrearPasswordHash(usuarioCreacionDTO.Password, out byte[] passwordHash, out byte[] passwordSalt);
+
+            Usuario usuario = new()
+            {
+                IdRol = 1, //Administrador
                 Nombre = usuarioCreacionDTO.Nombre,
                 ApellidoPaterno = usuarioCreacionDTO.ApellidoPaterno,
                 ApellidoMaterno = usuarioCreacionDTO.ApellidoMaterno,
@@ -181,16 +214,26 @@ namespace Web_API_Escuela.Controllers
                 return NotFound();
             }
 
+            var correo = usuarioActualizacionDTO.Correo.ToLower();
+
+            if (correo != usuario.Correo)//Verificar que el correo nuevo no se repita con otro registro
+            {
+                if (await context.Alumnos.AnyAsync(x => x.Correo == correo))
+                {
+                    return BadRequest("El correo ya existe.");
+                }
+            }
+
             usuario.Nombre = usuarioActualizacionDTO.Nombre;
             usuario.ApellidoPaterno = usuarioActualizacionDTO.ApellidoPaterno;
             usuario.ApellidoMaterno = usuarioActualizacionDTO.ApellidoMaterno;
-            usuario.Correo = usuarioActualizacionDTO.Correo;
+            usuario.Correo = usuarioActualizacionDTO.Correo.ToLower();
 
             //Verificar el cambio de contraseña
             if (!string.IsNullOrEmpty(usuarioActualizacionDTO.Password))
             {
-                CrearPasswordHash(usuarioActualizacionDTO.Password, out byte[] passwordHash, out byte[] passwordSalt);
-
+                Helpers.Helpers.CrearPasswordHash(usuarioActualizacionDTO.Password, out byte[] passwordHash, out byte[] passwordSalt);
+           
                 usuario.Password_hash = passwordHash;
                 usuario.Password_salt = passwordSalt;
             }
@@ -236,19 +279,6 @@ namespace Web_API_Escuela.Controllers
 
             return NoContent();
         }
-
-        private void CrearPasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
-        {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512())
-            {
-                passwordSalt = hmac.Key; //Aquí envía la llave
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)); //Envíar el password encriptado.
-            }
-
-        }
-
-        //crear admin
-
 
     }
 }
