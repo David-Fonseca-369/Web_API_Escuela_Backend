@@ -24,6 +24,9 @@ namespace Web_API_Escuela
             modelBuilder.ApplyConfiguration(new MateriaMap());
             modelBuilder.ApplyConfiguration(new UsuarioMap());
             modelBuilder.ApplyConfiguration(new AlumnoMap());
+
+            modelBuilder.ApplyConfiguration(new AsistenciaCabeceraMap());
+            modelBuilder.ApplyConfiguration(new AsistenciaDetalleMap());
         }
 
         public DbSet<Grupo> Grupos { get; set; }
@@ -31,6 +34,9 @@ namespace Web_API_Escuela
         public DbSet<Materia> Materias { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Alumno> Alumnos { get; set; }
+
+        public DbSet<AsistenciaCabecera> AsistenciaCabeceras { get; set; }
+        public DbSet<AsistenciaDetalle> AsistenciaDetalles { get; set; }
 
     }
 }

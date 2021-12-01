@@ -8,6 +8,8 @@ namespace Web_API_Escuela.DTOs.Materia
 {
     public class MateriaDTO
     {
+
+        
         public int IdMateria { get; set; }
         public int IdGrupo { get; set; }
         public string NombreGrupo { get; set; }

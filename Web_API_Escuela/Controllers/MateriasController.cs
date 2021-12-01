@@ -91,7 +91,7 @@ namespace Web_API_Escuela.Controllers
         }
 
         //GET: api/materias/asignadasPaginacion/{idDocente}
-        [HttpGet("asignadasPaginacion/{idDocente}")]
+        [HttpGet("asignadasPaginacion/{idDocente:int}")]
         public async Task<ActionResult<List<MateriaDTO>>>AsignadasPaginacion([FromQuery]PaginacionDTO paginacionDTO, int idDocente)
         {
             var materiasAsignadas = await context.Materias.Include(x => x.Grupo).Where(x => x.IdDocente == idDocente).ToListAsync();
@@ -114,6 +114,25 @@ namespace Web_API_Escuela.Controllers
 
             }).ToList();
         }
+
+        //GET: api/materias/asignadasTodas/{idDocente}
+        [HttpGet("asignadasTodas/{idDocente:int}")]
+        public async Task<ActionResult<List<MateriaDTO>>> AsignadasTodas(int idDocente)
+        {
+            var materiasAsignadas = await context.Materias.Include(x => x.Grupo).Where(x => x.IdDocente == idDocente).ToListAsync();
+
+            return materiasAsignadas.Select(x => new MateriaDTO
+            {
+                IdMateria = x.IdMateria,
+                IdGrupo = x.IdGrupo,
+                NombreGrupo = x.Grupo.Nombre,
+                IdDocente = x.IdDocente != null ? Convert.ToInt32(x.IdDocente) : 0,
+                Nombre = x.Nombre,
+                Estado = x.Estado
+
+            }).ToList();
+        }
+
 
 
         //GET: api/materias/{id}

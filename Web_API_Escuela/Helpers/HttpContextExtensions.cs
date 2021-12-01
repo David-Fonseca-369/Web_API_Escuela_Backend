@@ -30,5 +30,7 @@ namespace Web_API_Escuela.Helpers
             //debemos exponer esta cabecera em el startup, ya que no todas las cabeceras se pueden ver.
 
         }
+
+       
     }
 }

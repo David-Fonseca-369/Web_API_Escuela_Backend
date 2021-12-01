@@ -80,6 +80,57 @@ namespace Web_API_Escuela.Controllers
             }).ToList();
         }
 
+        //GET : api/alumnos/Asistencia/{idGrupo}
+        [HttpGet("Asistencia/{idGrupo:int}")]
+        public async Task<ActionResult<List<AlumnoAsistenciaDTO>>> Asistencia(int idGrupo)
+        {
+            var alumnosGrupo = await context.Alumnos.Where(x => x.IdGrupo == idGrupo).OrderBy(x => x.ApellidoPaterno).ThenBy(x => x.ApellidoMaterno).ThenBy(x => x.Nombre).ToListAsync();
+
+
+            return alumnosGrupo.Select(x => new AlumnoAsistenciaDTO
+            {
+              Nombre = $"{x.ApellidoPaterno} {x.ApellidoMaterno} {x.Nombre}",
+              Matricula = x.Matricula,
+              Asistencia = 0
+              
+
+            }).ToList();
+        }
+
+        //GET api/alumnos/GrupoPaginacion/{idGrupo}
+        [HttpGet("GrupoPaginacion/{idGrupo:int}")]
+        public async Task<ActionResult<List<AlumnoDTO>>>GrupoPaginacion([FromQuery]PaginacionDTO paginacionDTO, int idGrupo)
+        {
+            var alumnosGrupo = await context.Alumnos.Include(x => x.Grupo).Where(x => x.IdGrupo == idGrupo).ToListAsync();
+
+            int cantidad = alumnosGrupo.Count();
+
+            HttpContext.InsertarParametrosPaginacionEnCabeceraPersonalizado(cantidad);
+
+            var queryable = alumnosGrupo.AsQueryable();
+
+            var alumnosGrupoPaginado = queryable.Paginar(paginacionDTO).ToList();
+
+            return alumnosGrupoPaginado.Select(x => new AlumnoDTO
+            {
+                IdAlumno = x.IdAlumno,
+                IdGrupo = x.IdGrupo,
+                NombreGrupo = x.Grupo.Nombre,
+                Nombre = x.Nombre,
+                ApellidoPaterno = x.ApellidoPaterno,
+                ApellidoMaterno = x.ApellidoMaterno,
+                Curp = x.Curp,
+                Matricula = x.Matricula,
+                Correo = x.Correo,
+                Telefono = x.Telefono,
+                FechaNacimiento = x.FechaNacimiento,
+                Genero = x.Genero,
+                Direccion = x.Direccion,
+                NombreTutor = x.NombreTutor,
+                NumeroTutor = x.NumeroTutor,
+                Estado = x.Estado
+            }).ToList();
+        }
 
         //GET: api/alumnos/{id}
         [HttpGet("{id:int}")]
@@ -189,7 +240,7 @@ namespace Web_API_Escuela.Controllers
                     return BadRequest("La CURP ya existe.");
                 }
             }
-
+            alumno.IdGrupo = alumnoActualizacionDTO.IdGrupo;
             alumno.Nombre = alumnoActualizacionDTO.Nombre;
             alumno.ApellidoPaterno = alumnoActualizacionDTO.ApellidoPaterno;
             alumno.ApellidoMaterno = alumnoActualizacionDTO.ApellidoMaterno;
