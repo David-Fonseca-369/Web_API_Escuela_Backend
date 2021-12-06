@@ -27,28 +27,51 @@ namespace Web_API_Escuela
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
+
+
         public void ConfigureServices(IServiceCollection services)
         {
             //Configuramos el servicio automapper
             services.AddAutoMapper(typeof(Startup));
 
 
-            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("defaultConnection")));
+            services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("defaultConnection"), builder =>
+                {
+                    builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+                });
+
+            });
 
             //services.AddControllers();
 
             //Registra el log de errores como filtro global
-            services.AddControllers( options =>
-            {
-                options.Filters.Add(typeof(ExceptionFilter));
-            });
+            services.AddControllers(options =>
+           {
+               options.Filters.Add(typeof(ExceptionFilter));
+           });
+
+            //Desarrollo
 
             services.AddCors(options => options.AddDefaultPolicy(buider =>
             {
-                buider.WithOrigins("*").AllowAnyMethod().AllowAnyHeader()
+                buider.WithOrigins("*").AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin()
                 .WithExposedHeaders(new string[] { "cantidadTotalRegistros" });
 
             }));
+
+            //Producción
+            //services.AddCors(options =>
+            //{
+            //    var frontend_url = Configuration.GetValue<string>("frontend_url");
+            //    options.AddDefaultPolicy(builder =>
+            //    {
+            //        builder.WithOrigins(frontend_url).AllowAnyMethod().AllowAnyHeader()
+            //        .WithExposedHeaders(new string[] { "cantidadTotalRegistros" });
+            //    });
+
+            //});
 
             services.AddSwaggerGen(c =>
             {

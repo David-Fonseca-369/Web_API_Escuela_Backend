@@ -92,8 +92,6 @@ namespace Web_API_Escuela.Controllers
               Nombre = $"{x.ApellidoPaterno} {x.ApellidoMaterno} {x.Nombre}",
               Matricula = x.Matricula,
               Asistencia = 0
-              
-
             }).ToList();
         }
 
