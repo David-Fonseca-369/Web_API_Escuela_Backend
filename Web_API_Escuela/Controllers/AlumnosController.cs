@@ -89,15 +89,33 @@ namespace Web_API_Escuela.Controllers
 
             return alumnosGrupo.Select(x => new AlumnoAsistenciaDTO
             {
-              Nombre = $"{x.ApellidoPaterno} {x.ApellidoMaterno} {x.Nombre}",
-              Matricula = x.Matricula,
-              Asistencia = 0
+                IdAlumno = x.IdAlumno,
+                Nombre = $"{x.ApellidoPaterno} {x.ApellidoMaterno} {x.Nombre}",
+                Matricula = x.Matricula,
+                Asistencia = 0
             }).ToList();
         }
 
+        //GET : api/alumnos/calificacion/{idGrupo}
+        [HttpGet("Calificacion/{idGrupo:int}")]
+        public async Task<ActionResult<List<AlumnoCalificacionDTO>>> Calificacion(int idGrupo)
+        {
+            var alumnosGrupo = await context.Alumnos.Where(x => x.IdGrupo == idGrupo).OrderBy(x => x.ApellidoPaterno).ThenBy(x => x.ApellidoMaterno).ThenBy(x => x.Nombre).ToListAsync();
+
+            return alumnosGrupo.Select(x => new AlumnoCalificacionDTO() 
+            { 
+                IdAlumno = x.IdAlumno,
+                Nombre = $"{x.ApellidoPaterno} {x.ApellidoMaterno} {x.Nombre}",
+                Matricula = x.Matricula,
+                Calificacion = 0
+            }).ToList();
+
+        }
+
+
         //GET api/alumnos/GrupoPaginacion/{idGrupo}
         [HttpGet("GrupoPaginacion/{idGrupo:int}")]
-        public async Task<ActionResult<List<AlumnoDTO>>>GrupoPaginacion([FromQuery]PaginacionDTO paginacionDTO, int idGrupo)
+        public async Task<ActionResult<List<AlumnoDTO>>> GrupoPaginacion([FromQuery] PaginacionDTO paginacionDTO, int idGrupo)
         {
             var alumnosGrupo = await context.Alumnos.Include(x => x.Grupo).Where(x => x.IdGrupo == idGrupo).ToListAsync();
 

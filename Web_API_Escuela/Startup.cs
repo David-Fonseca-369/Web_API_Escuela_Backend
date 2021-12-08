@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Web_API_Escuela.Filters;
+using Web_API_Escuela.Helpers;
 
 namespace Web_API_Escuela
 {
@@ -33,6 +34,10 @@ namespace Web_API_Escuela
         {
             //Configuramos el servicio automapper
             services.AddAutoMapper(typeof(Startup));
+
+            //Para el servicio almacenar archivos de manera local
+            services.AddTransient<IAlmacenadorArchivos, AlmacenadorArchivosLocal>();
+            services.AddHttpContextAccessor();
 
 
             services.AddDbContext<ApplicationDbContext>(options =>

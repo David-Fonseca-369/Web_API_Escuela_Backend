@@ -8,13 +8,14 @@ using Web_API_Escuela.Entities;
 
 namespace Web_API_Escuela.Mapping
 {
-    public class AsistenciaDetalleMap : IEntityTypeConfiguration<AsistenciaDetalle>
+    public class CalificacionDetalleMap : IEntityTypeConfiguration<CalificacionDetalle>
     {
-        public void Configure(EntityTypeBuilder<AsistenciaDetalle> builder)
+        public void Configure(EntityTypeBuilder<CalificacionDetalle> builder)
         {
-            builder.ToTable("asistenciaDetalle").HasKey(x => x.IdDetalle);
+            builder.ToTable("calificacionDetalle")
+                .HasKey(x => x.IdDetalle);
 
-            builder.HasOne(x => x.AsistenciaCabecera).WithMany().HasForeignKey(x => x.IdCabecera);
+            builder.HasOne(x => x.CalificacionCabecera).WithMany().HasForeignKey(x => x.IdCabecera);
             builder.HasOne(x => x.Alumno).WithMany().HasForeignKey(x => x.IdAlumno);
         }
     }

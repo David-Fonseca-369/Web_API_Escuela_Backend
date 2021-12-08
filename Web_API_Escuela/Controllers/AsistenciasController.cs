@@ -25,11 +25,9 @@ namespace Web_API_Escuela.Controllers
         [HttpPost("crear")]
         public async Task<ActionResult> Crear([FromBody] AsistenciasCreacionDTO asistenciasCreacionDTO)
         {
-
             //1 = asistencia
             //2 = retardo
             //3 = falta
-
 
             //Validar que la asistencia no se encuentre registrada
             var fechaGuardada = await context.AsistenciaCabeceras.FirstOrDefaultAsync(x => x.Fecha == asistenciasCreacionDTO.Fecha);
@@ -58,8 +56,7 @@ namespace Web_API_Escuela.Controllers
                 AsistenciaDetalle detalle = new()
                 {
                     IdCabecera = idCabecera,
-                    Nombre = item.Nombre,
-                    Matricula = item.Matricula,
+                    IdAlumno = item.IdAlumno,
                     Asistencia = item.Asistencia == 0 ? 3 : item.Asistencia
                 };
 
@@ -73,12 +70,14 @@ namespace Web_API_Escuela.Controllers
         }
 
 
-        [HttpGet("obtenerAsistencias/{idMateria:int}/{idPeriodo:int}/{desde}/{hasta}")]
+        [HttpGet("obtenerAsistencias/{idMateria:int}/{idPeriodo:int}/{idGrupo:int}/{desde}/{hasta}")]
         public async Task<ActionResult<AsistenciasTablaDTO>> ObtenerAsistencias([FromRoute] int idMateria,
-            int idPeriodo, 
+            int idPeriodo,
+            int idGrupo,
             DateTime desde,
             DateTime hasta)
         {
+
             //Traigo consulta general
             var asistenciasCabecera = await context.AsistenciaCabeceras.Where(x => x.Fecha >= desde && x.Fecha <= hasta
             && x.IdMateria == idMateria
@@ -105,7 +104,8 @@ namespace Web_API_Escuela.Controllers
                 //Lista de alumnos por fecha
                 var asistenciaDetalle = await context.AsistenciaDetalles
                     .Include(x => x.AsistenciaCabecera)
-                    .Where(x => x.IdCabecera == item.IdCabecera)
+                    .Include(x => x.Alumno)
+                    .Where(x => x.IdCabecera == item.IdCabecera && x.Alumno.IdGrupo == idGrupo)//Filtro por grupo, para checar que aun exista en este grupo.
                     .ToListAsync();
 
                 if (asistenciaDetalle != null)
@@ -120,35 +120,61 @@ namespace Web_API_Escuela.Controllers
             //Agrupo la asitencia por alumno
             var asistenciasALumno = asistenciasDetallesConsulta.GroupBy(x => new
             {
-                x.Nombre,
-                x.Matricula,
+                x.IdAlumno
             }).ToList();
 
             //Asistencia por alumno
-            List<AsistenciasDTO> asistenciasList = new List<AsistenciasDTO>();
+            List<AsistenciasDTO> asistenciasList = new();
 
             foreach (var item in asistenciasALumno)
             {
                 //asistencias Alumno
-                List<AsistenciaFechaDTO> asistenciasAlumnoFechasList = new List<AsistenciaFechaDTO>();
+                List<AsistenciaFechaDTO> asistenciasAlumnoFechasList = new();
+
+                //contador de asistencias
+                int asistencias = 0;
+                int retardos = 0;
+                int faltas = 0;
 
                 foreach (var asistenciaFecha in item)
                 {
+                    if (asistenciaFecha.Asistencia == 1)
+                    {
+                        asistencias++;
+                    }
 
+                    if (asistenciaFecha.Asistencia == 2)
+                    {
+                        retardos++;
+                    }
+
+                    if (asistenciaFecha.Asistencia == 3)
+                    {
+                        faltas++;
+                    }
+                   
 
                     asistenciasAlumnoFechasList.Add(new AsistenciaFechaDTO()
                     {
                         Asistencia = asistenciaFecha.Asistencia,
                         Fecha = asistenciaFecha.AsistenciaCabecera.Fecha
                     });
+                }
 
-
+                //Consulto los datos del alumno
+                var alumno = await context.Alumnos.FirstOrDefaultAsync(x => x.IdAlumno == item.Key.IdAlumno);
+                if (alumno == null)
+                {
+                    BadRequest($"Alumno con id = {item.Key.IdAlumno} no encontrado.");
                 }
 
                 asistenciasList.Add(new AsistenciasDTO()
                 {
-                    Nombre = item.Key.Nombre,
-                    Matricula = item.Key.Matricula,
+                    Nombre = $"{alumno.ApellidoPaterno} {alumno.ApellidoMaterno} {alumno.Nombre}",
+                    Matricula = alumno.Matricula,
+                    AsistenciasTotal = asistencias,
+                    RetardosTotal = retardos,
+                    FaltasTotal = faltas,
                     Asistencias = asistenciasAlumnoFechasList,
                 });
 
@@ -161,7 +187,7 @@ namespace Web_API_Escuela.Controllers
                 TotalAsistenciasFila = totalAsistencias
             };
 
-            
+
             return asistenciasTabla;
         }
     }

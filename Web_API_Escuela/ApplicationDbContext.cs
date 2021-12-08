@@ -27,6 +27,13 @@ namespace Web_API_Escuela
 
             modelBuilder.ApplyConfiguration(new AsistenciaCabeceraMap());
             modelBuilder.ApplyConfiguration(new AsistenciaDetalleMap());
+            modelBuilder.ApplyConfiguration(new EvaluacionMap());
+
+            modelBuilder.ApplyConfiguration(new CalificacionCabeceraMap());
+            modelBuilder.ApplyConfiguration(new CalificacionDetalleMap());
+
+            modelBuilder.ApplyConfiguration(new PublicacionMap());
+            modelBuilder.ApplyConfiguration(new ArchivoMap());
         }
 
         public DbSet<Grupo> Grupos { get; set; }
@@ -38,5 +45,12 @@ namespace Web_API_Escuela
         public DbSet<AsistenciaCabecera> AsistenciaCabeceras { get; set; }
         public DbSet<AsistenciaDetalle> AsistenciaDetalles { get; set; }
 
+        public DbSet<Evaluacion> Evaluaciones { get; set; }
+
+        public DbSet<CalificacionCabecera> CalificacionCabeceras { get; set; }
+        public DbSet<CalificacionDetalle> CalificacionDetalles { get; set; }
+
+        public DbSet<Publicacion> Publicaciones { get; set; }
+        public DbSet<Archivo> Archivos { get; set; }
     }
 }

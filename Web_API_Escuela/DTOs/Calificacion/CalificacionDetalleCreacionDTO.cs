@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using Web_API_Escuela.Entities;
 
-namespace Web_API_Escuela.DTOs.Alumno
+namespace Web_API_Escuela.DTOs.Calificacion
 {
-    public class AlumnoAsistenciaDTO
+    public class CalificacionDetalleCreacionDTO
     {
+        [Required]
         public int IdAlumno { get; set; }
         public string Nombre { get; set; }
         public string Matricula { get; set; }
-        public int Asistencia { get; set; }
-        
+        [Required]
+        public decimal  Calificacion { get; set; }
     }
 }
