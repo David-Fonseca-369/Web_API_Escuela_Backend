@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Web_API_Escuela.DTOs;
 using Web_API_Escuela.DTOs.Publicacion;
 using Web_API_Escuela.Entities;
 using Web_API_Escuela.Helpers;
@@ -33,8 +35,10 @@ namespace Web_API_Escuela.Controllers
                 IdMateria = publicacionCreacionDTO.IdMateria,
                 IdPeriodo = publicacionCreacionDTO.IdPeriodo,
                 Nombre = publicacionCreacionDTO.Nombre,
-                FechaEntrega = publicacionCreacionDTO.FechaEntrega,
-                Descripcion = publicacionCreacionDTO.Descripcion
+                FechaEntrega = publicacionCreacionDTO.FechaEntrega != null ? Convert.ToDateTime(publicacionCreacionDTO.FechaEntrega) : null,
+                Descripcion = publicacionCreacionDTO.Descripcion,
+                FechaCreacion = DateTime.Now,
+                Estado = true
             };
 
             context.Add(publicacion);
@@ -53,18 +57,112 @@ namespace Web_API_Escuela.Controllers
             foreach (var item in publicacionCreacionDTO.Archivos)
             {
 
-               string  rutaArchivo = await almacenadorArchivos.GuardarArchivo(contenedor, item.Archivo);
+                string rutaArchivo = await almacenadorArchivos.GuardarArchivo(contenedor, item);
+
 
                 Archivo archivo = new()
                 {
                     IdPublicacion = idPublicacion,
-                    RutaArchivo = rutaArchivo
+                    RutaArchivo = rutaArchivo,
+                    Nombre = item.FileName
                 };
 
                 context.Add(archivo);
             }
 
             await context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        //GET : api/publicaciones/TodosPaginacion
+        [HttpGet("todosPaginacion/{idMateria:int}/{idPeriodo:int}")]
+        public async Task<ActionResult<List<PublicacionDTO>>> TodosPaginacion([FromQuery] PaginacionDTO paginacionDTO, [FromRoute] int idMateria, int idPeriodo)
+        {
+            var publicaciones = await context.Publicaciones.Where(x => x.IdMateria == idMateria && x.IdPeriodo == idPeriodo && x.Estado == true).ToListAsync();
+
+            int cantidad = publicaciones.Count;
+
+            HttpContext.InsertarParametrosPaginacionEnCabeceraPersonalizado(cantidad);
+
+            var queryable = publicaciones.AsQueryable();
+
+            var publicacionesPaginado = queryable.Paginar(paginacionDTO).ToList();
+
+            return publicacionesPaginado.Select(x => new PublicacionDTO()
+            {
+                IdPublicacion = x.IdPublicacion,
+                Nombre = x.Nombre,
+                FechaCreacion = x.FechaCreacion
+            }).ToList();
+
+        }
+
+
+        //GET : api/publicaciones/{idPublicacion}
+        [HttpGet("{idPublicacion:int}")]
+        public async Task<ActionResult<PublicacionDetallesDTO>> Get([FromRoute] int idPublicacion)
+        {
+            var publicacion = await context.Publicaciones.FirstOrDefaultAsync(x => x.IdPublicacion == idPublicacion);
+
+            if (publicacion == null)
+            {
+                return NotFound();
+            }
+
+            List<ArchivoDTO> archivosList = new();
+
+            //consulto los archivos
+            var archivos = await context.Archivos.Where(x => x.IdPublicacion == idPublicacion).ToListAsync();
+
+            if (archivos != null)
+            {
+                archivosList = archivos.Select(x => new ArchivoDTO()
+                {
+                    Nombre = x.Nombre,
+                    RutaArchivo = x.RutaArchivo
+                }).ToList();
+            }
+
+            PublicacionDetallesDTO publicacionDetallesDTO = new()
+            {
+                Nombre = publicacion.Nombre,
+                FechaEntrega = publicacion.FechaEntrega,
+                Descripcion = publicacion.Descripcion,
+                Archivos = archivosList
+            };
+
+            return publicacionDetallesDTO;
+        }
+
+        //DELETE : api/publicaciones/Eliminar
+        [HttpDelete("eliminar/{idPublicacion:int}")]
+        public async Task<ActionResult> Eliminar([FromRoute] int idPublicacion)
+        {
+            var publicacion = await context.Publicaciones.FirstOrDefaultAsync(x => x.IdPublicacion == idPublicacion);
+
+            if (publicacion == null)
+            {
+                return NotFound();
+            }
+
+
+
+            publicacion.Estado = false;
+
+            await context.SaveChangesAsync();
+
+            //eliminar documentos relacionados y archivos
+            var archivos = await context.Archivos.Where(x => x.IdPublicacion == publicacion.IdPublicacion).ToListAsync();
+
+            if (archivos != null)
+            {
+                foreach (var archivo in archivos)
+                {
+                    await almacenadorArchivos.BorrarArchivo(archivo.RutaArchivo, contenedor);
+                }
+
+            }
 
             return NoContent();
         }

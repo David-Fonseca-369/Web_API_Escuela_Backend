@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -14,11 +15,11 @@ namespace Web_API_Escuela.DTOs.Publicacion
         public int IdPeriodo { get; set; }
         [Required]
         public string Nombre { get; set; }
-        public DateTime FechaEntrega { get; set; }
+        public string FechaEntrega { get; set; }
         public string Descripcion { get; set; }
 
         //Detalles archivos
-        public List<ArchivoCreacionDTO> Archivos { get; set; }
+        public IList<IFormFile> Archivos { get; set; }
 
     }
 }

@@ -5,12 +5,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Web_API_Escuela.DTOs.Publicacion
+namespace Web_API_Escuela.DTOs.Carousel_Imagen
 {
-    public class ArchivoCreacionDTO
+    public class Carousel_ImagenCreacionDTO
     {
-        //Recibo archivo
         [Required]
-        public IFormFile Archivo { get; set; }
+        public IFormFile Imagen { get; set; }
     }
 }

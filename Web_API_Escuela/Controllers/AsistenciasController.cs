@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Web_API_Escuela.DTOs.Asistencia;
+using Web_API_Escuela.DTOs.Materia;
 using Web_API_Escuela.Entities;
 
 namespace Web_API_Escuela.Controllers
@@ -152,7 +153,7 @@ namespace Web_API_Escuela.Controllers
                     {
                         faltas++;
                     }
-                   
+
 
                     asistenciasAlumnoFechasList.Add(new AsistenciaFechaDTO()
                     {
@@ -190,5 +191,7 @@ namespace Web_API_Escuela.Controllers
 
             return asistenciasTabla;
         }
+
+      
     }
 }

@@ -100,16 +100,21 @@ namespace Web_API_Escuela.Controllers
         [HttpGet("Calificacion/{idGrupo:int}")]
         public async Task<ActionResult<List<AlumnoCalificacionDTO>>> Calificacion(int idGrupo)
         {
-            var alumnosGrupo = await context.Alumnos.Where(x => x.IdGrupo == idGrupo).OrderBy(x => x.ApellidoPaterno).ThenBy(x => x.ApellidoMaterno).ThenBy(x => x.Nombre).ToListAsync();
+            var alumnosGrupo = await context.Alumnos
+                .Where(x => x.IdGrupo == idGrupo)
+                .OrderBy(x => x.ApellidoPaterno)
+                .ThenBy(x => x.ApellidoMaterno)
+                .ThenBy(x => x.Nombre)
+                .ToListAsync();
 
-            return alumnosGrupo.Select(x => new AlumnoCalificacionDTO() 
-            { 
+
+            return alumnosGrupo.Select(x => new AlumnoCalificacionDTO()
+            {
                 IdAlumno = x.IdAlumno,
                 Nombre = $"{x.ApellidoPaterno} {x.ApellidoMaterno} {x.Nombre}",
                 Matricula = x.Matricula,
                 Calificacion = 0
             }).ToList();
-
         }
 
 
@@ -117,7 +122,10 @@ namespace Web_API_Escuela.Controllers
         [HttpGet("GrupoPaginacion/{idGrupo:int}")]
         public async Task<ActionResult<List<AlumnoDTO>>> GrupoPaginacion([FromQuery] PaginacionDTO paginacionDTO, int idGrupo)
         {
-            var alumnosGrupo = await context.Alumnos.Include(x => x.Grupo).Where(x => x.IdGrupo == idGrupo).ToListAsync();
+            var alumnosGrupo = await context.Alumnos
+                .Include(x => x.Grupo)
+                .Where(x => x.IdGrupo == idGrupo)
+                .ToListAsync();
 
             int cantidad = alumnosGrupo.Count();
 
@@ -153,6 +161,7 @@ namespace Web_API_Escuela.Controllers
         public async Task<ActionResult<AlumnoDTO>> Get(int id)
         {
             var alumno = await context.Alumnos.Include(x => x.Grupo).FirstOrDefaultAsync(x => x.IdAlumno == id);
+
             if (alumno == null)
             {
                 return NotFound();

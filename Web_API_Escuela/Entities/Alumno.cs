@@ -22,9 +22,10 @@ namespace Web_API_Escuela.Entities
         [MaxLength(20)]
         public string Curp { get; set; }
         [Required]
-        [MaxLength(20)]
+        [MaxLength(50)]
         public string Matricula { get; set; }
         [Required]
+        [MaxLength(50)]
         [EmailAddress]
         public string Correo { get; set; }
         [MaxLength(20)]

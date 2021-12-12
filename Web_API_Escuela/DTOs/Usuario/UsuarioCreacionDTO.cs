@@ -10,13 +10,17 @@ namespace Web_API_Escuela.DTOs.Usuario
     {
 
         [Required]
+        [MaxLength(50)]
         public string Nombre { get; set; }
         [Required]
+        [MaxLength(50)]
         public string ApellidoPaterno { get; set; }
         [Required]
+        [MaxLength(50)]
         public string ApellidoMaterno { get; set; }
         [Required]
         [EmailAddress]
+        [MaxLength(50)]
         public string Correo { get; set; }
         [Required]
         [MinLength(8, ErrorMessage = "La contraseña debe contener mínimo 8 caracteres.")]

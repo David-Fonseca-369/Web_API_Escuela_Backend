@@ -14,14 +14,11 @@ namespace Web_API_Escuela.Entities
         [Required]
         public int IdPeriodo { get; set; }
         [Required]
-        public int IdEvaluacion { get; set; }
+        public int Evaluacion { get; set; }
 
         //Relaciones
 
         public Materia Materia { get; set; }
         public Periodo Periodo { get; set; }
-        public Evaluacion Evaluacion { get; set; }
-
-
     }
 }

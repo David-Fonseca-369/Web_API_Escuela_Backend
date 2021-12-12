@@ -17,7 +17,6 @@ namespace Web_API_Escuela.Mapping
 
             builder.HasOne(x => x.Materia).WithMany().HasForeignKey(x => x.IdMateria);
             builder.HasOne(x => x.Periodo).WithMany().HasForeignKey(x => x.IdPeriodo);
-            builder.HasOne(x => x.Evaluacion).WithMany().HasForeignKey(x => x.IdEvaluacion);
         }
     }
 }

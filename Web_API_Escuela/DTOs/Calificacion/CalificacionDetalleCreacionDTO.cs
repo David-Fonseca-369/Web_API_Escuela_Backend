@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Web_API_Escuela.Validaciones;
 
 namespace Web_API_Escuela.DTOs.Calificacion
 {
@@ -13,6 +14,7 @@ namespace Web_API_Escuela.DTOs.Calificacion
         public string Nombre { get; set; }
         public string Matricula { get; set; }
         [Required]
+        [RangoCalificacion]
         public decimal  Calificacion { get; set; }
     }
 }

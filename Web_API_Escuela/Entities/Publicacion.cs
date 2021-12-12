@@ -15,10 +15,11 @@ namespace Web_API_Escuela.Entities
         public int IdPeriodo { get; set; }
         [Required]
         public string Nombre { get; set; }
-        [Required]
-        public DateTime FechaEntrega { get; set; }
-        [Required]
+        public DateTime? FechaEntrega { get; set; }
         public string Descripcion { get; set; }
+        public DateTime? FechaCreacion { get; set; }
+        [Required]
+        public bool Estado { get; set; }
 
 
         //Relaciones

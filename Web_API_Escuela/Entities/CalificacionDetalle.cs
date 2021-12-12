@@ -13,8 +13,9 @@ namespace Web_API_Escuela.Entities
         public int IdCabecera { get; set; }
         [Required]
         public int IdAlumno { get; set; }
-        [Required]
-        public decimal Calificacion { get; set; }
+        public decimal primerParcial { get; set; }
+        public decimal segundoParcial { get; set; }
+        public decimal tercerParcial { get; set; }
 
         public CalificacionCabecera CalificacionCabecera { get; set; }
         public Alumno Alumno { get; set; }

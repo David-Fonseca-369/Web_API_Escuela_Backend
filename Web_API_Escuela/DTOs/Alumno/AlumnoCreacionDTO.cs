@@ -11,21 +11,24 @@ namespace Web_API_Escuela.DTOs.Alumno
         [Required]
         public int IdGrupo { get; set; }
         [Required]
+        [MaxLength(50)]
         public string Nombre { get; set; }
         [Required]
+        [MaxLength(50)]
         public string ApellidoPaterno { get; set; }
         [Required]
+        [MaxLength(50)]
         public string ApellidoMaterno { get; set; }
         [Required]
         [MinLength(18, ErrorMessage = "Se requieren 18 caracteres.")]
         [MaxLength(20)]
         public string Curp { get; set; }
         [Required]
-        [MaxLength(20)]
+        [MaxLength(50)]
         public string Matricula { get; set; }
         [Required]
         [EmailAddress]
-        [MaxLength(20)]
+        [MaxLength(50)]
         public string Correo { get; set; }
         [Phone]
         [MaxLength(20)]
@@ -37,7 +40,7 @@ namespace Web_API_Escuela.DTOs.Alumno
         [Required]
         public string Direccion { get; set; }
         public string NombreTutor { get; set; }
-        [MaxLength(20)]
+        [MaxLength(60)]
         public string NumeroTutor { get; set; }
         [Required]
         [MinLength(8, ErrorMessage = "La contraseña debe contener mínimo 8 caracteres.")]
