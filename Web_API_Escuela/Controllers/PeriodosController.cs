@@ -51,8 +51,8 @@ namespace Web_API_Escuela.Controllers
         public async Task<ActionResult<PeriodoDTO>> PeriodoActual()
         {
 
-            DateTime hoy = new DateTime(2021, 09, 09); //Ejemplo
-            //DateTime hoy = DateTime.Now;
+            //DateTime hoy = new DateTime(2021, 09, 09); //Ejemplo
+            DateTime hoy = DateTime.Now;
 
             var periodo = await context.Periodos.Where(x => hoy >= x.FechaInicio && hoy <= x.FechaFin).FirstOrDefaultAsync();
 

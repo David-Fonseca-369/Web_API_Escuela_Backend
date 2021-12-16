@@ -135,6 +135,35 @@ namespace Web_API_Escuela.Controllers
             return publicacionDetallesDTO;
         }
 
+        //GET : api/publicaciones/materia/{idMateria}/{idPeriodo}
+        [HttpGet("materia/{idMateria:int}/{idPeriodo:int}")]
+        public async Task<ActionResult<List<PublicacionDetallesDTO>>> Materia([FromRoute] int idMateria, int idPeriodo)
+        {
+            var publicaciones = await context.Publicaciones.Where(x => x.IdMateria == idMateria && x.IdPeriodo == idPeriodo && x.Estado == true).ToListAsync();
+
+            List<PublicacionDetallesDTO> publicacionDetalles = new();
+
+
+            foreach (var publicacion in publicaciones)
+            {
+                List<ArchivoDTO> archivosList = new();
+
+
+                var archivos = await context.Archivos.Where(x => x.IdPublicacion == publicacion.IdPublicacion).ToListAsync();
+
+                foreach (var archivo in archivos)
+                {
+                    archivosList.Add(new ArchivoDTO { Nombre = archivo.Nombre, RutaArchivo = archivo.RutaArchivo });
+                }
+
+                publicacionDetalles.Add(new PublicacionDetallesDTO { Nombre = publicacion.Nombre, FechaEntrega = publicacion.FechaEntrega, Descripcion = publicacion.Descripcion, Archivos = archivosList });
+
+            }
+
+            return publicacionDetalles;
+
+        }
+
         //DELETE : api/publicaciones/Eliminar
         [HttpDelete("eliminar/{idPublicacion:int}")]
         public async Task<ActionResult> Eliminar([FromRoute] int idPublicacion)

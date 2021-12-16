@@ -37,6 +37,10 @@ namespace Web_API_Escuela
 
             modelBuilder.ApplyConfiguration(new Carousel_ImagenMap());
 
+            modelBuilder.ApplyConfiguration(new GaleriaMap());
+
+            modelBuilder.ApplyConfiguration(new OrganigramaMap());
+
         }
 
         public DbSet<Grupo> Grupos { get; set; }
@@ -57,5 +61,8 @@ namespace Web_API_Escuela
         public DbSet<Archivo> Archivos { get; set; }
 
         public DbSet<Carousel_Imagen> Carousel_Imagenes { get; set; }
+        public DbSet<Galeria> Galerias { get; set; }
+
+        public DbSet<Organigrama> Organigramas { get; set; }
     }
 }

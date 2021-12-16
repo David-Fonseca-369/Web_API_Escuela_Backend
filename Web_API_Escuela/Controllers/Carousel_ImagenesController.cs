@@ -18,7 +18,7 @@ namespace Web_API_Escuela.Controllers
         private readonly ApplicationDbContext context;
         private readonly IAlmacenadorArchivos almacenadorArchivos;
         private readonly IMapper mapper;
-        private readonly string contendor = "imagenes_carousel";
+        private readonly string contenedor = "imagenes_carousel";
 
 
         public Carousel_ImagenesController(ApplicationDbContext context, IAlmacenadorArchivos almacenadorArchivos, IMapper mapper)
@@ -43,7 +43,7 @@ namespace Web_API_Escuela.Controllers
         [HttpPost]
         public async Task<ActionResult> Post([FromForm] Carousel_ImagenCreacionDTO carousel)
         {
-            string rutaArchivo = await almacenadorArchivos.GuardarArchivo(contendor, carousel.Imagen);
+            string rutaArchivo = await almacenadorArchivos.GuardarArchivo(contenedor, carousel.Imagen);
 
             Carousel_Imagen carousel_Imagen = new()
             {
@@ -73,7 +73,7 @@ namespace Web_API_Escuela.Controllers
 
             await context.SaveChangesAsync();
 
-            await almacenadorArchivos.BorrarArchivo(carousel_imagen.Ruta, contendor);
+            await almacenadorArchivos.BorrarArchivo(carousel_imagen.Ruta, contenedor);
 
             return NoContent();
 

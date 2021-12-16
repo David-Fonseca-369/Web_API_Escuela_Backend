@@ -21,6 +21,7 @@ namespace Web_API_Escuela.Entities
         public Grupo Grupo { get; set; }
 
         //Poner aquí el docente
+        public Usuario Docente { get; set; }
 
     }
 }

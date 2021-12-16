@@ -133,7 +133,22 @@ namespace Web_API_Escuela.Controllers
             }).ToList();
         }
 
+        //GET : api/materias/grupo
+        [HttpGet("grupo/{idGrupo:int}")]
+        public async Task<ActionResult<List<MateriaGrupoDTO>>> Grupo([FromRoute] int idGrupo)
+        {
+            var materias = await context.Materias.Include(x => x.Grupo).Include(x => x.Docente).Where(x => x.IdGrupo == idGrupo).ToListAsync();
 
+            return materias.Select(x => new MateriaGrupoDTO() {
+            IdMateria = x.IdMateria,
+            IdGrupo = x.IdGrupo,
+            NombreGrupo = x.Grupo.Nombre,
+            IdDocente = x.IdDocente != null ? Convert.ToInt32(x.IdDocente) : 0,
+            NombreDocente = x.IdDocente != null ? $"{x.Docente.Nombre} {x.Docente.ApellidoPaterno} {x.Docente.ApellidoMaterno}" : "No Asignada",
+            Nombre = x.Nombre,
+            Estado = x.Estado
+            }).ToList();
+        }
 
         //GET: api/materias/{id}
         [HttpGet("{id:int}")]

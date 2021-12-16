@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Web_API_Escuela.DTOs.Carousel_Imagen;
+using Web_API_Escuela.DTOs.Galeria;
 using Web_API_Escuela.DTOs.Grupo;
+using Web_API_Escuela.DTOs.Organigrama;
 using Web_API_Escuela.DTOs.Periodo;
 using Web_API_Escuela.Entities;
 
@@ -26,6 +28,10 @@ namespace Web_API_Escuela.Helpers
             CreateMap<PeriodoCreacionDTO, Periodo>();
 
             CreateMap<Carousel_Imagen, Carousel_ImagenDTO>().ReverseMap();
+
+            CreateMap<Galeria, GaleriaDTO>().ReverseMap();
+
+            CreateMap<Organigrama, OrganigramaDTO>().ReverseMap();
         }
     }
 }

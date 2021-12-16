@@ -31,7 +31,7 @@ namespace Web_API_Escuela.Controllers
             //3 = falta
 
             //Validar que la asistencia no se encuentre registrada
-            var fechaGuardada = await context.AsistenciaCabeceras.FirstOrDefaultAsync(x => x.Fecha == asistenciasCreacionDTO.Fecha);
+            var fechaGuardada = await context.AsistenciaCabeceras.FirstOrDefaultAsync(x => x.Fecha == asistenciasCreacionDTO.Fecha && x.IdPeriodo == asistenciasCreacionDTO.IdPeriodo && x.IdMateria == asistenciasCreacionDTO.IdMateria);
 
             if (fechaGuardada != null)
             {

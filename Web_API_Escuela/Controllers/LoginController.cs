@@ -34,7 +34,7 @@ namespace Web_API_Escuela.Controllers
         {
             var correo = model.Correo.ToLower();
 
-            var usuario = await context.Usuarios.Where(x => x.Estado == true).FirstOrDefaultAsync(x => x.Correo == correo);
+            var usuario = await context.Usuarios.FirstOrDefaultAsync(x => x.Correo == correo && x.Estado == true);
 
             if (usuario == null)
             {
@@ -50,6 +50,28 @@ namespace Web_API_Escuela.Controllers
             return ConstruirToken(usuario);
         }
 
+        //POST : api/login/alumno
+        [HttpPost("alumno")]
+        public async Task<ActionResult<RespuestaAutenticacionDTO>>Alumno(LoginAlumnoDTO model)
+        {
+            var curp = model.Curp.ToUpper();
+
+            var alumno = await context.Alumnos.FirstOrDefaultAsync(x => x.Curp == curp && x.Estado == true);
+            if (alumno == null)
+            {
+                return BadRequest("El alumno no existe.");
+            }
+
+            //Verifico contraseña
+            if (!VerificarPasswordHash(model.Password, alumno.Password_hash, alumno.Password_salt))
+            {
+                return BadRequest("Login incorrecto");
+            }
+
+            return ConstruirTokenAlumno(alumno);
+
+        }
+
         private RespuestaAutenticacionDTO ConstruirToken(Usuario usuario)
         {
             var claims = new List<Claim>()
@@ -60,6 +82,32 @@ namespace Web_API_Escuela.Controllers
                 new Claim("apellidoPaterno", usuario.ApellidoPaterno),
                 new Claim("apellidoMaterno", usuario.ApellidoMaterno),
                 new Claim("correo", usuario.Correo)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["keyjwt"]));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expires = DateTime.Now.AddHours(1);
+
+            var token = new JwtSecurityToken(issuer: null, audience: null, claims: claims, expires: expires, signingCredentials: credentials);
+
+            return new RespuestaAutenticacionDTO()
+            {
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                Expiracion = expires
+            };
+        }
+
+        private RespuestaAutenticacionDTO ConstruirTokenAlumno(Alumno alumno)
+        {
+            var claims = new List<Claim>()
+            {
+                new Claim("idAlumno",alumno.IdAlumno.ToString()),
+                new Claim("rol", "Alumno"),
+                new Claim("nombre", alumno.Nombre),
+                new Claim("apellidoPaterno", alumno.ApellidoPaterno),
+                new Claim("apellidoMaterno", alumno.ApellidoMaterno),
+                new Claim("idGrupo", alumno.IdGrupo.ToString()),
+                new Claim("correo", alumno.Correo)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["keyjwt"]));
