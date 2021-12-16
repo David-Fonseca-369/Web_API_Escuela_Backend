@@ -52,7 +52,7 @@ namespace Web_API_Escuela.Controllers
 
         //POST : api/login/alumno
         [HttpPost("alumno")]
-        public async Task<ActionResult<RespuestaAutenticacionDTO>>Alumno(LoginAlumnoDTO model)
+        public async Task<ActionResult<RespuestaAutenticacionDTO>> Alumno(LoginAlumnoDTO model)
         {
             var curp = model.Curp.ToUpper();
 
@@ -72,15 +72,120 @@ namespace Web_API_Escuela.Controllers
 
         }
 
+        [HttpGet("DatosUsuario/{idUsuario:int}/{rol}")]
+        public async Task<ActionResult<DatosUsuarioDTO>> DatosUsuario([FromRoute] int idUsuario, string rol)
+        {
+            //consulto
+            if (rol == "Administrador" || rol == "Docente")//es usuario (administrador/docente)
+            {
+                var usuario = await context.Usuarios.FirstOrDefaultAsync(x => x.IdUsuario == idUsuario);
+
+                if (usuario == null)
+                {
+                    return NotFound();
+                }
+
+                DatosUsuarioDTO datos = new()
+                {
+                    Nombre = usuario.Nombre,
+                    ApellidoPaterno = usuario.ApellidoPaterno,
+                    ApellidoMaterno = usuario.ApellidoMaterno,
+                    Rol = rol,
+                    Correo = usuario.Correo
+                };
+
+                return datos;
+
+            }
+            else if (rol == "Alumno")
+            {
+                var alumno = await context.Alumnos.FirstOrDefaultAsync(x => x.IdAlumno == idUsuario);
+
+                if (alumno == null)
+                {
+                    return NoContent();
+                }
+
+                DatosUsuarioDTO datosAlumno = new()
+                {
+                    Nombre = alumno.Nombre,
+                    ApellidoPaterno = alumno.ApellidoPaterno,
+                    ApellidoMaterno = alumno.ApellidoMaterno,
+                    Rol = rol,
+                    Correo = alumno.Correo
+                };
+
+                return datosAlumno;
+
+            }
+
+            return NotFound();
+
+        }
+
+        [HttpPut("CambiarPassword/{idUsuario:int}/{rol}")]
+        public async Task<ActionResult> CambiarPassword([FromRoute] int idUsuario, string rol, [FromBody] ActualizarPasswordDTO actualizarPasswordDTO)
+        {
+            //consulto
+            if (rol == "Administrador" || rol == "Docente")//es usuario (administrador/docente)
+            {
+                var usuario = await context.Usuarios.FirstOrDefaultAsync(x => x.IdUsuario == idUsuario);
+
+                if (usuario == null)
+                {
+                    return NotFound();
+                }
+
+                if (!string.IsNullOrEmpty(actualizarPasswordDTO.Password))
+                {
+                    Helpers.Helpers.CrearPasswordHash(actualizarPasswordDTO.Password, out byte[] passwordHash, out byte[] passwordSalt);
+
+                    usuario.Password_hash = passwordHash;
+                    usuario.Password_salt = passwordSalt;
+
+                    await context.SaveChangesAsync();
+
+                    return Ok();
+                }
+
+                return BadRequest();
+            }
+            else if (rol == "Alumno")
+            {
+                var alumno = await context.Alumnos.FirstOrDefaultAsync(x => x.IdAlumno == idUsuario);
+
+                if (alumno == null)
+                {
+                    return NoContent();
+                }
+
+                if (!string.IsNullOrEmpty(actualizarPasswordDTO.Password))
+                {
+                    Helpers.Helpers.CrearPasswordHash(actualizarPasswordDTO.Password, out byte[] passwordHash, out byte[] passwordSalt);
+
+                    alumno.Password_hash = passwordHash;
+                    alumno.Password_salt = passwordSalt;
+
+                    await context.SaveChangesAsync();
+
+                    return Ok();
+                }
+
+                return BadRequest();
+            }
+
+            return NotFound();
+        }
+
         private RespuestaAutenticacionDTO ConstruirToken(Usuario usuario)
         {
             var claims = new List<Claim>()
             {
                 new Claim("idUsuario",usuario.IdUsuario.ToString()),
                 new Claim("rol",usuario.IdRol == 1 ? "Administrador" : usuario.IdRol == 2 ? "Docente" : "Indefinido"),
-                new Claim("nombre", usuario.Nombre),
-                new Claim("apellidoPaterno", usuario.ApellidoPaterno),
-                new Claim("apellidoMaterno", usuario.ApellidoMaterno),
+                //new Claim("nombre", usuario.Nombre),
+                //new Claim("apellidoPaterno", usuario.ApellidoPaterno),
+                //new Claim("apellidoMaterno", usuario.ApellidoMaterno),
                 new Claim("correo", usuario.Correo)
             };
 
@@ -92,6 +197,9 @@ namespace Web_API_Escuela.Controllers
 
             return new RespuestaAutenticacionDTO()
             {
+                Nombre = usuario.Nombre,
+                ApellidoPaterno = usuario.ApellidoPaterno,
+                ApellidoMaterno = usuario.ApellidoMaterno,
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 Expiracion = expires
             };
@@ -103,9 +211,9 @@ namespace Web_API_Escuela.Controllers
             {
                 new Claim("idAlumno",alumno.IdAlumno.ToString()),
                 new Claim("rol", "Alumno"),
-                new Claim("nombre", alumno.Nombre),
-                new Claim("apellidoPaterno", alumno.ApellidoPaterno),
-                new Claim("apellidoMaterno", alumno.ApellidoMaterno),
+                //new Claim("nombre", alumno.Nombre),
+                //new Claim("apellidoPaterno", alumno.ApellidoPaterno),
+                //new Claim("apellidoMaterno", alumno.ApellidoMaterno),
                 new Claim("idGrupo", alumno.IdGrupo.ToString()),
                 new Claim("correo", alumno.Correo)
             };
@@ -118,6 +226,9 @@ namespace Web_API_Escuela.Controllers
 
             return new RespuestaAutenticacionDTO()
             {
+                Nombre = alumno.Nombre,
+                ApellidoPaterno = alumno.ApellidoPaterno,
+                ApellidoMaterno = alumno.ApellidoMaterno,
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 Expiracion = expires
             };

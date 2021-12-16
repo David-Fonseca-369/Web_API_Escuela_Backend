@@ -85,13 +85,13 @@ namespace Web_API_Escuela.Controllers
                 await context.SaveChangesAsync();
 
                 //Registro las calificaciones
-                
+
 
                 var listaCalificaciones = await context.CalificacionDetalles.Where(x => x.IdCabecera == cabeceraCalificacion.IdCabecera).ToListAsync();
 
                 foreach (var item in calificacionesCreacionDTO.Detalles)
                 {
-                    var alumnoCalificaciones = await context.CalificacionDetalles.FirstOrDefaultAsync(x => x.IdAlumno == item.IdAlumno && x.IdCabecera == cabeceraCalificacion.IdCabecera); 
+                    var alumnoCalificaciones = await context.CalificacionDetalles.FirstOrDefaultAsync(x => x.IdAlumno == item.IdAlumno && x.IdCabecera == cabeceraCalificacion.IdCabecera);
 
                     if (alumnoCalificaciones != null)//si existe
                     {
@@ -260,15 +260,15 @@ namespace Web_API_Escuela.Controllers
                             case float n when (n > 6.9 && n <= 7.9):
                                 medioBajo++;
                                 break;
-                            
+
                             case float n when (n > 7.9 && n <= 8.9):
                                 medio++;
                                 break;
-                            
+
                             case float n when (n > 8.9 && n <= 9.9):
                                 medioAlto++;
                                 break;
-                            
+
                             case 10:
                                 alto++;
                                 break;
@@ -280,7 +280,7 @@ namespace Web_API_Escuela.Controllers
                     }
 
                     //LLenar lista
-                    List<CalificacionesMateriaDTO> calificacionesMateriaDTO = new ();
+                    List<CalificacionesMateriaDTO> calificacionesMateriaDTO = new();
 
                     calificacionesMateriaDTO.Add(new CalificacionesMateriaDTO { Name = "0 - 5.9", Value = reprobados });
                     calificacionesMateriaDTO.Add(new CalificacionesMateriaDTO { Name = "6 - 6.9", Value = bajos });
@@ -409,6 +409,12 @@ namespace Web_API_Escuela.Controllers
 
             return NoContent();
 
+        }
+
+        [HttpGet("boleta/{idAlumno:int}")]
+        public async Task<ActionResult> Calificaciones()
+        {
+            return Ok();
         }
 
       
