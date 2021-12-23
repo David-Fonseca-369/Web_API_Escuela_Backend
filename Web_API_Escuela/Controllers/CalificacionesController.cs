@@ -411,13 +411,79 @@ namespace Web_API_Escuela.Controllers
 
         }
 
-        [HttpGet("boleta/{idAlumno:int}")]
-        public async Task<ActionResult> Calificaciones()
+        [HttpGet("calificacionesBoleta/{idAlumno:int}")]
+        public async Task<ActionResult<List<CalificacionesBoletaDTO>>> CalificacionesBoleta(int idAlumno)
         {
-            return Ok();
+
+            var alumno = await context.Alumnos.FirstOrDefaultAsync(x => x.IdAlumno == idAlumno);
+
+            if (alumno == null)
+            {
+                return NotFound();
+            }
+
+            //Consultar materias que cursa 
+            var materiasCursa = await context.Materias.Include(x => x.Grupo).Include(x => x.Docente).Where(x => x.IdGrupo == alumno.IdGrupo).ToListAsync();
+
+
+            List<CalificacionesBoletaDTO> listaCalificaciones = new();
+
+            //traigo periodo actual
+            var periodo = await PeriodoActual();
+
+            if (periodo == null)
+            {
+                return BadRequest("Por el momento no hay ningún periodo activo.");
+            }
+
+            //Ver si todas estan evaluadas hasta el nivel 3
+            foreach (var materia in materiasCursa)
+            {
+                var materiaEvaluacion = await context.CalificacionCabeceras.FirstOrDefaultAsync(x => x.IdMateria == materia.IdMateria && x.IdPeriodo == periodo.IdPeriodo);
+
+                if (materiaEvaluacion == null)
+                {
+                    return BadRequest($"No se encontraron calificaciones registradas en {materia.Nombre}.");
+                }
+
+                //verifico que ya se haya evaluado hasta el 3
+                if (materiaEvaluacion.Evaluacion != 3)
+                {
+                    return BadRequest("Aún no se han calificado todas las materias.");
+                }
+
+                //traigo calificacaciones 
+                var calificaciones = await context.CalificacionDetalles.FirstOrDefaultAsync(x => x.IdCabecera == materiaEvaluacion.IdCabecera && x.IdAlumno == idAlumno);
+
+                //sumo las falificaciones 
+                decimal promedio = (calificaciones.primerParcial + calificaciones.segundoParcial + calificaciones.tercerParcial) / 3;
+
+                listaCalificaciones.Add(new CalificacionesBoletaDTO() { NombreMateria = materia.Nombre, NombrePeriodo = periodo.Nombre,Calificacion = Math.Round(promedio, 1) });
+
+            }
+
+            //Mandar listra de todas las calificaciones
+
+
+            return listaCalificaciones;
+
         }
 
-      
+        private async Task<Periodo> PeriodoActual()
+        {
+            DateTime hoy = DateTime.Now;
+
+            var periodo = await context.Periodos.Where(x => hoy >= x.FechaInicio && hoy <= x.FechaFin).FirstOrDefaultAsync();
+
+            if (periodo == null)
+            {
+                return null;
+            }
+
+            return periodo;
+        }
+
+
 
     }
 }

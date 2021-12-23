@@ -80,6 +80,42 @@ namespace Web_API_Escuela.Controllers
             }).ToList();
         }
 
+        //Get: api/alumnos/Filtrar
+        [HttpGet("filtrarTodos")]
+        public async Task<List<AlumnoDTO>> FiltrarTodos([FromQuery] AlumnoFiltrarDTO alumnoFiltrarDTO)
+        {
+            var alumnosQueryable = context.Alumnos.Include(x => x.Grupo).AsQueryable();
+
+            if (!string.IsNullOrEmpty(alumnoFiltrarDTO.NombreAlumno))
+            {
+                alumnosQueryable = alumnosQueryable.Where(x => x.Nombre.Contains(alumnoFiltrarDTO.NombreAlumno) || x.ApellidoPaterno.Contains(alumnoFiltrarDTO.NombreAlumno) || x.ApellidoMaterno.Contains(alumnoFiltrarDTO.NombreAlumno));
+            }
+
+            await HttpContext.InsertarParametrosPaginacionEnCabecera(alumnosQueryable);
+            var alumnos = await alumnosQueryable.Paginar(alumnoFiltrarDTO.PaginacionDTO).ToListAsync();
+
+            return alumnos.Select(x => new AlumnoDTO
+            {
+                IdAlumno = x.IdAlumno,
+                IdGrupo = x.IdGrupo,
+                NombreGrupo = x.Grupo.Nombre,
+                Nombre = x.Nombre,
+                ApellidoPaterno = x.ApellidoPaterno,
+                ApellidoMaterno = x.ApellidoMaterno,
+                Curp = x.Curp,
+                Matricula = x.Matricula,
+                Correo = x.Correo,
+                Telefono = x.Telefono,
+                FechaNacimiento = x.FechaNacimiento,
+                Genero = x.Genero,
+                Direccion = x.Direccion,
+                NombreTutor = x.NombreTutor,
+                NumeroTutor = x.NumeroTutor,
+                Estado = x.Estado
+            }).ToList();
+
+        }
+
         //GET : api/alumnos/Asistencia/{idGrupo}
         [HttpGet("Asistencia/{idGrupo:int}")]
         public async Task<ActionResult<List<AlumnoAsistenciaDTO>>> Asistencia(int idGrupo)
@@ -328,6 +364,8 @@ namespace Web_API_Escuela.Controllers
             return NoContent();
         }
 
+
+        
 
     }
 }

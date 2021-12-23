@@ -28,7 +28,7 @@ namespace Web_API_Escuela.Controllers
         }
 
 
-        //POST: api/login/usario
+        //POST: api/login/usuario
         [HttpPost("usuario")]
         public async Task<ActionResult<RespuestaAutenticacionDTO>> Usuario(LoginUsuarioDTO model)
         {
@@ -56,7 +56,7 @@ namespace Web_API_Escuela.Controllers
         {
             var curp = model.Curp.ToUpper();
 
-            var alumno = await context.Alumnos.FirstOrDefaultAsync(x => x.Curp == curp && x.Estado == true);
+            var alumno = await context.Alumnos.Include(x => x.Grupo).FirstOrDefaultAsync(x => x.Curp == curp && x.Estado == true);
             if (alumno == null)
             {
                 return BadRequest("El alumno no existe.");
@@ -215,6 +215,7 @@ namespace Web_API_Escuela.Controllers
                 //new Claim("apellidoPaterno", alumno.ApellidoPaterno),
                 //new Claim("apellidoMaterno", alumno.ApellidoMaterno),
                 new Claim("idGrupo", alumno.IdGrupo.ToString()),
+                new Claim("nombreGrupo", alumno.Grupo.Nombre),
                 new Claim("correo", alumno.Correo)
             };
 

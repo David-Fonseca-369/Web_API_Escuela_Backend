@@ -65,7 +65,8 @@ namespace Web_API_Escuela.Controllers
 
         //GET: api/materias/disponiblesPaginacion
         [HttpGet("disponiblesPaginacion")]
-        public async Task<ActionResult<List<MateriaDTO>>> DisponiblesPaginacion([FromQuery] PaginacionDTO paginacionDTO) {
+        public async Task<ActionResult<List<MateriaDTO>>> DisponiblesPaginacion([FromQuery] PaginacionDTO paginacionDTO)
+        {
 
             var materiasDisponibles = await context.Materias.Include(x => x.Grupo).Where(x => x.IdDocente == null && x.Estado == true).ToListAsync();
 
@@ -92,7 +93,7 @@ namespace Web_API_Escuela.Controllers
 
         //GET: api/materias/asignadasPaginacion/{idDocente}
         [HttpGet("asignadasPaginacion/{idDocente:int}")]
-        public async Task<ActionResult<List<MateriaDTO>>>AsignadasPaginacion([FromQuery]PaginacionDTO paginacionDTO, int idDocente)
+        public async Task<ActionResult<List<MateriaDTO>>> AsignadasPaginacion([FromQuery] PaginacionDTO paginacionDTO, int idDocente)
         {
             var materiasAsignadas = await context.Materias.Include(x => x.Grupo).Where(x => x.IdDocente == idDocente).ToListAsync();
             int cantidad = materiasAsignadas.Count();
@@ -139,14 +140,15 @@ namespace Web_API_Escuela.Controllers
         {
             var materias = await context.Materias.Include(x => x.Grupo).Include(x => x.Docente).Where(x => x.IdGrupo == idGrupo).ToListAsync();
 
-            return materias.Select(x => new MateriaGrupoDTO() {
-            IdMateria = x.IdMateria,
-            IdGrupo = x.IdGrupo,
-            NombreGrupo = x.Grupo.Nombre,
-            IdDocente = x.IdDocente != null ? Convert.ToInt32(x.IdDocente) : 0,
-            NombreDocente = x.IdDocente != null ? $"{x.Docente.Nombre} {x.Docente.ApellidoPaterno} {x.Docente.ApellidoMaterno}" : "No Asignada",
-            Nombre = x.Nombre,
-            Estado = x.Estado
+            return materias.Select(x => new MateriaGrupoDTO()
+            {
+                IdMateria = x.IdMateria,
+                IdGrupo = x.IdGrupo,
+                NombreGrupo = x.Grupo.Nombre,
+                IdDocente = x.IdDocente != null ? Convert.ToInt32(x.IdDocente) : 0,
+                NombreDocente = x.IdDocente != null ? $"{x.Docente.Nombre} {x.Docente.ApellidoPaterno} {x.Docente.ApellidoMaterno}" : "No Asignada",
+                Nombre = x.Nombre,
+                Estado = x.Estado
             }).ToList();
         }
 
@@ -173,13 +175,19 @@ namespace Web_API_Escuela.Controllers
 
             return materiaDTO;
         }
-        
+
 
         //POST: api/materias/crear
         [HttpPost("crear")]
         public async Task<ActionResult> Crear([FromBody] MateriaCreacionDTO materiaCreacionDTO)
         {
-            Materia materia = new Materia
+            //Comprobamos si ya existe el nombre
+            if (await MateriaExiste(materiaCreacionDTO.Nombre))
+            {
+                return BadRequest("Ya hay una materia registrada con el mismo nombre.");
+            }
+
+            Materia materia = new()
             {
                 IdGrupo = materiaCreacionDTO.IdGrupo,
                 Nombre = materiaCreacionDTO.Nombre,
@@ -202,6 +210,15 @@ namespace Web_API_Escuela.Controllers
             if (materia == null)
             {
                 return NotFound();
+            }
+
+            if (materia.Nombre != materiaCreacionDTO.Nombre)
+            {
+                //Comprobamos si ya existe el nombre
+                if (await MateriaExiste(materiaCreacionDTO.Nombre))
+                {
+                    return BadRequest("Ya hay una materia registrada con el mismo nombre.");
+                }
             }
 
             materia.IdGrupo = materiaCreacionDTO.IdGrupo;
@@ -276,7 +293,7 @@ namespace Web_API_Escuela.Controllers
         }
 
         //PUT: api/materias/quitar/{idMateria}
-        [HttpPut ("quitar/{id:int}")]
+        [HttpPut("quitar/{id:int}")]
         public async Task<ActionResult> Quitar(int id)
         {
             var materia = await context.Materias.FirstOrDefaultAsync(x => x.IdMateria == id);
@@ -292,5 +309,14 @@ namespace Web_API_Escuela.Controllers
 
             return NoContent();
         }
+
+
+
+        //Comprobar materia
+        private async Task<bool> MateriaExiste(string nombre)
+        {
+            return await context.Materias.AnyAsync(x => x.Nombre == nombre);
+        }
+
     }
 }

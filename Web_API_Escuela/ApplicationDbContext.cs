@@ -41,6 +41,8 @@ namespace Web_API_Escuela
 
             modelBuilder.ApplyConfiguration(new OrganigramaMap());
 
+            modelBuilder.ApplyConfiguration(new EncuestaMap());
+
         }
 
         public DbSet<Grupo> Grupos { get; set; }
@@ -64,5 +66,6 @@ namespace Web_API_Escuela
         public DbSet<Galeria> Galerias { get; set; }
 
         public DbSet<Organigrama> Organigramas { get; set; }
+        public DbSet<Encuesta> Encuestas { get; set; }
     }
 }
