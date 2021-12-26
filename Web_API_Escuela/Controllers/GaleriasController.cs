@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -36,6 +37,7 @@ namespace Web_API_Escuela.Controllers
             return mapper.Map<List<GaleriaDTO>>(fotos_galeria);
         }
 
+        [Authorize]
         //POST : api/galerias
         [HttpPost]
         public async Task<ActionResult> Post([FromForm] GaleriaCreacionDTO galeriaCreacionDTO)
@@ -57,6 +59,7 @@ namespace Web_API_Escuela.Controllers
 
 
         //Delete api/galerias/eliminar
+        [Authorize]
         [HttpDelete("eliminar/{id:int}")]
         public async Task<ActionResult> Eliminar(int id)
         {

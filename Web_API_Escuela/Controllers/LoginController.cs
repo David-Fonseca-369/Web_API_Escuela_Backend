@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -72,6 +73,7 @@ namespace Web_API_Escuela.Controllers
 
         }
 
+        [Authorize]
         [HttpGet("DatosUsuario/{idUsuario:int}/{rol}")]
         public async Task<ActionResult<DatosUsuarioDTO>> DatosUsuario([FromRoute] int idUsuario, string rol)
         {
@@ -123,6 +125,7 @@ namespace Web_API_Escuela.Controllers
 
         }
 
+        [Authorize]
         [HttpPut("CambiarPassword/{idUsuario:int}/{rol}")]
         public async Task<ActionResult> CambiarPassword([FromRoute] int idUsuario, string rol, [FromBody] ActualizarPasswordDTO actualizarPasswordDTO)
         {

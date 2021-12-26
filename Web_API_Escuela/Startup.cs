@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -8,10 +9,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Web_API_Escuela.Filters;
 using Web_API_Escuela.Helpers;
@@ -78,6 +81,20 @@ namespace Web_API_Escuela
 
             //});
 
+            //Agregar autenticacion
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opciones =>
+            opciones.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = true, //valida el tiempo de vida
+                ValidateIssuerSigningKey = true, //valida la firma con la llave privada
+                IssuerSigningKey = new SymmetricSecurityKey( //configuramos la llave
+                Encoding.UTF8.GetBytes(Configuration["keyjwt"])),
+                ClockSkew = TimeSpan.Zero //para no tener problemas con diferencias de tiempo al calcular que el token ha vencido.
+
+            });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Web_API_Escuela", Version = "v1" });
@@ -99,6 +116,9 @@ namespace Web_API_Escuela
             app.UseRouting();
 
             app.UseCors();
+
+            //para autorizarte primero tienes que autorizarte, así que va antes este middlware
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

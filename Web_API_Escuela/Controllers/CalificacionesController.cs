@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using Web_API_Escuela.Entities;
 
 namespace Web_API_Escuela.Controllers
 {
+    [Authorize]
     [Route("api/calificaciones")]
     [ApiController]
     public class CalificacionesController : ControllerBase

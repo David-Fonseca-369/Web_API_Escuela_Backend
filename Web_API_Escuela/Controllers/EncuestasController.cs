@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using Web_API_Escuela.Helpers;
 
 namespace Web_API_Escuela.Controllers
 {
+    [Authorize]
     [Route("api/encuestas")]
     [ApiController]
     public class EncuestasController : ControllerBase

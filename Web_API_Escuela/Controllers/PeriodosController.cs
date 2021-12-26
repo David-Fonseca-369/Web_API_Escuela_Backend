@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -12,6 +13,7 @@ using Web_API_Escuela.Helpers;
 
 namespace Web_API_Escuela.Controllers
 {
+    [Authorize]
     [Route("api/periodos")]
     [ApiController]
     public class PeriodosController : ControllerBase

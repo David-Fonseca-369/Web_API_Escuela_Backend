@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -44,6 +45,7 @@ namespace Web_API_Escuela.Controllers
         }
 
         //PUT : api/organigramas/editar
+        [Authorize]
         [HttpPut("editar")]
         public async Task<ActionResult>Editar([FromForm] OrganigramaCreacionDTO organigramaCreacionDTO)
         {

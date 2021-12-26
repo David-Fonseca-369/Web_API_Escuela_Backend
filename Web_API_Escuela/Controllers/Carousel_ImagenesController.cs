@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -31,6 +32,7 @@ namespace Web_API_Escuela.Controllers
 
 
         //GET: api/carousel_imagenes/todos
+
         [HttpGet("todos")]
         public async Task<ActionResult<List<Carousel_ImagenDTO>>> Todos()
         {
@@ -41,6 +43,7 @@ namespace Web_API_Escuela.Controllers
 
         //POST : api/carousel_imagenes
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult> Post([FromForm] Carousel_ImagenCreacionDTO carousel)
         {
             string rutaArchivo = await almacenadorArchivos.GuardarArchivo(contenedor, carousel.Imagen);
@@ -60,6 +63,7 @@ namespace Web_API_Escuela.Controllers
 
         //Delete api/carousel_imagenes/eliminar
         [HttpDelete("eliminar/{id:int}")]
+        [Authorize]
         public async Task<ActionResult>Eliminar(int id)
         {
             var carousel_imagen = await context.Carousel_Imagenes.FirstOrDefaultAsync(x => x.Id == id);
