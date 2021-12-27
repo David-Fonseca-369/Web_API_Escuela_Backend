@@ -25,6 +25,7 @@ namespace Web_API_Escuela.Controllers
         }
 
         //GET: api/alumnos/todos
+        [AllowAnonymous]
         [HttpGet("Todos")]
         public async Task<ActionResult<List<AlumnoDTO>>> Todos()
         {
