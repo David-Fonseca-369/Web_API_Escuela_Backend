@@ -37,6 +37,15 @@ namespace Web_API_Escuela.Controllers
             return mapper.Map<List<GaleriaDTO>>(fotos_galeria);
         }
 
+        //GET api/galeria/imagenesTodas
+        [HttpGet("imagenesTodas")]
+        public async Task<ActionResult<List<ImagenesGaleriaDTO>>> ImagenesTodas()
+        {
+            var imagenesGaleria = await context.Galerias.ToListAsync();
+
+            return imagenesGaleria.Select(x => new ImagenesGaleriaDTO { Ruta = x.Ruta }).ToList();
+        }
+
         [Authorize]
         //POST : api/galerias
         [HttpPost]

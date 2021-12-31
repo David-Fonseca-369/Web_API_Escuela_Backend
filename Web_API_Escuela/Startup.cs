@@ -113,6 +113,9 @@ namespace Web_API_Escuela
 
             app.UseHttpsRedirection();
 
+            //Permite servir archivos estaticos
+            app.UseStaticFiles();
+
             app.UseRouting();
 
             app.UseCors();

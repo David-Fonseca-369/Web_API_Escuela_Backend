@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Web_API_Escuela.DTOs;
 using Web_API_Escuela.DTOs.Encuesta;
 using Web_API_Escuela.Entities;
 using Web_API_Escuela.Helpers;
@@ -26,6 +27,8 @@ namespace Web_API_Escuela.Controllers
             this.almacenadorArchivos = almacenadorArchivos;
         }
 
+
+        //POST : api/encuestas/crear
         [HttpPost("crear")]
         public async Task<ActionResult<RespuestaEncuestaDTO>> Crear([FromForm] EncuestaCreacionDTO encuestaCreacionDTO)
         {
@@ -45,7 +48,7 @@ namespace Web_API_Escuela.Controllers
                     Grado = encuestaCreacionDTO.Grado,
                     Grupo = encuestaCreacionDTO.Grupo,
                     Semestre = encuestaCreacionDTO.Semestre,
-                    Facebook =  encuestaCreacionDTO.Facebook != null ? encuestaCreacionDTO.Facebook.ToUpper() : null,
+                    Facebook = encuestaCreacionDTO.Facebook != null ? encuestaCreacionDTO.Facebook.ToUpper() : null,
                     Twitter = encuestaCreacionDTO.Twitter != null ? encuestaCreacionDTO.Twitter.ToUpper() : null,
 
                     NombreTutor = encuestaCreacionDTO.NombreTutor.ToUpper(),
@@ -69,7 +72,7 @@ namespace Web_API_Escuela.Controllers
                 await context.SaveChangesAsync();
 
                 return new RespuestaEncuestaDTO() { IdEncuesta = encuesta.IdEncuesta };
-                
+
             }
             else
             {
@@ -77,6 +80,54 @@ namespace Web_API_Escuela.Controllers
             }
         }
 
+        //GET: api/encuestas/todasPaginacion
+        [HttpGet("todasPaginacion")]
+        public async Task<ActionResult<List<IndiceEncuestaDTO>>> TodasPaginacion([FromQuery] PaginacionDTO paginacionDTO)
+        {
+            var encuestas = await context.Encuestas.Include(x => x.Alumno).OrderByDescending(x => x.IdEncuesta).ToListAsync();
+
+            int cantidad = encuestas.Count();
+
+            HttpContext.InsertarParametrosPaginacionEnCabeceraPersonalizado(cantidad);
+
+            var queryable = encuestas.AsQueryable();
+
+            var encuestasPaginado = queryable.Paginar(paginacionDTO).ToList();
+
+            return encuestasPaginado.Select(x => new IndiceEncuestaDTO
+            {
+                IdEncuesta = x.IdEncuesta,
+                NombreAlumno = $"{x.Alumno.Nombre} {x.Alumno.ApellidoPaterno} {x.Alumno.ApellidoMaterno}",
+                Matricula = x.Alumno.Matricula,
+                RutaArchivo = x.RutaArchivo
+            }).ToList();
+        }
+
+        //GET: api/filtrarTodas
+        [HttpGet("filtrarTodas")]
+        public async Task<ActionResult<List<IndiceEncuestaDTO>>> FiltrarTodas([FromQuery] EncuestaFiltrarDTO encuestaFiltrarDTO)
+        {
+            var encuestasQueryable = context.Encuestas.Include(x => x.Alumno).AsQueryable();
+
+            if (encuestaFiltrarDTO.IdEncuesta > 0)
+            {
+                encuestasQueryable = encuestasQueryable.Where(x => x.IdEncuesta == encuestaFiltrarDTO.IdEncuesta);
+            }
+
+            await HttpContext.InsertarParametrosPaginacionEnCabecera(encuestasQueryable);
+            var encuestas = await encuestasQueryable.Paginar(encuestaFiltrarDTO.PaginacionDTO).ToListAsync();
+
+            return encuestas.Select(x => new IndiceEncuestaDTO
+            {
+                IdEncuesta = x.IdEncuesta,
+                NombreAlumno = $"{x.Alumno.Nombre} {x.Alumno.ApellidoPaterno} {x.Alumno.ApellidoMaterno}",
+                Matricula = x.Alumno.Matricula,
+                RutaArchivo = x.RutaArchivo
+            }).ToList();
+
+        }
+
+        //GET: api/encuestas/comprobante/{idEncuesta}
         [HttpGet("Comprobante/{idEncuesta:int}")]
         public async Task<ActionResult<EncuestaDTO>> Comprobante([FromRoute] int idEncuesta)
         {
@@ -85,7 +136,7 @@ namespace Web_API_Escuela.Controllers
             //Calcular edades 
             if (encuestaRegistrada == null)
             {
-               return NotFound();
+                return NotFound();
             }
 
             EncuestaDTO encuestaRespuesta = new()
@@ -129,9 +180,27 @@ namespace Web_API_Escuela.Controllers
             return encuestaRespuesta;
         }
 
+        //DELETE : api/encuestas/eliminar/{id}
+        [HttpDelete("eliminar/{idEncuesta:int}")]
+        public async Task<ActionResult>Eliminar(int idEncuesta)
+        {
+            var encuesta = await context.Encuestas.FirstOrDefaultAsync(x => x.IdEncuesta == idEncuesta);
+
+            if (encuesta == null)
+            {
+                return NotFound();
+            }
+
+            context.Remove(encuesta);
+
+            await context.SaveChangesAsync();
+            await almacenadorArchivos.BorrarArchivo(encuesta.RutaArchivo, contenedor);
+
+            return NoContent();
+        }
+
         private int CalcularEdad(DateTime fechaNacimiento)
         {
-            DateTime now = DateTime.Today;
             int edad = DateTime.Today.Year - fechaNacimiento.Year;
             if (DateTime.Today < fechaNacimiento.AddYears(edad))
             {
