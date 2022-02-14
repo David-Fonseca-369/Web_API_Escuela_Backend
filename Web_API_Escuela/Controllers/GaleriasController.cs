@@ -32,7 +32,7 @@ namespace Web_API_Escuela.Controllers
         [HttpGet("todos")]
         public async Task<ActionResult<List<GaleriaDTO>>> Todos()
         {
-            var fotos_galeria = await context.Galerias.ToListAsync();
+            var fotos_galeria = await context.Galerias.OrderByDescending(x => x.Id).ToListAsync();
 
             return mapper.Map<List<GaleriaDTO>>(fotos_galeria);
         }
@@ -41,7 +41,7 @@ namespace Web_API_Escuela.Controllers
         [HttpGet("imagenesTodas")]
         public async Task<ActionResult<List<ImagenesGaleriaDTO>>> ImagenesTodas()
         {
-            var imagenesGaleria = await context.Galerias.ToListAsync();
+            var imagenesGaleria = await context.Galerias.OrderByDescending( x=> x.Id).ToListAsync();
 
             return imagenesGaleria.Select(x => new ImagenesGaleriaDTO { Ruta = x.Ruta }).ToList();
         }
