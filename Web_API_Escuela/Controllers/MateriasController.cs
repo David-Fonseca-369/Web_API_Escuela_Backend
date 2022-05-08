@@ -80,16 +80,15 @@ namespace Web_API_Escuela.Controllers
 
             var materiasDisponiblesPaginadas = queryable.Paginar(paginacionDTO).ToList();
 
-
             return materiasDisponiblesPaginadas.Select(x => new MateriaDTO
-            {
+            {                
                 IdMateria = x.IdMateria,
                 IdGrupo = x.IdGrupo,
                 NombreGrupo = x.Grupo.Nombre,
                 IdDocente = x.IdDocente != null ? Convert.ToInt32(x.IdDocente) : 0,
                 Nombre = x.Nombre,
                 Estado = x.Estado
-
+                
             }).ToList();
         }
 
