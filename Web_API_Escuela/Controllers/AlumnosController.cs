@@ -235,7 +235,7 @@ namespace Web_API_Escuela.Controllers
             var correo = alumnoCreacionDTO.Correo.ToLower();
             var curp = alumnoCreacionDTO.Curp.ToLower();
 
-            if (await context.Alumnos.AnyAsync(x => x.Correo == correo))
+            if (await context.Usuarios.AnyAsync(x => x.Correo == correo) || await context.Alumnos.AnyAsync(x => x.Correo == correo))
             {
                 return BadRequest("El correo ya existe.");
             }
@@ -250,13 +250,13 @@ namespace Web_API_Escuela.Controllers
             Alumno alumno = new()
             {
                 IdGrupo = alumnoCreacionDTO.IdGrupo,
-                Nombre = alumnoCreacionDTO.Nombre,
-                ApellidoPaterno = alumnoCreacionDTO.ApellidoPaterno,
-                ApellidoMaterno = alumnoCreacionDTO.ApellidoMaterno,
-                Curp = alumnoCreacionDTO.Curp.ToUpper(),
-                Matricula = alumnoCreacionDTO.Matricula,
-                Correo = alumnoCreacionDTO.Correo.ToLower(),
-                Telefono = alumnoCreacionDTO.Telefono,
+                Nombre = alumnoCreacionDTO.Nombre.Trim(),
+                ApellidoPaterno = alumnoCreacionDTO.ApellidoPaterno.Trim(),
+                ApellidoMaterno = alumnoCreacionDTO.ApellidoMaterno.Trim(),
+                Curp = alumnoCreacionDTO.Curp.ToUpper().Trim(),
+                Matricula = alumnoCreacionDTO.Matricula.Trim(),
+                Correo = alumnoCreacionDTO.Correo.ToLower().Trim(),
+                Telefono = alumnoCreacionDTO.Telefono.Trim(),
                 FechaNacimiento = alumnoCreacionDTO.FechaNacimiento,
                 Genero = alumnoCreacionDTO.Genero,
                 Direccion = alumnoCreacionDTO.Direccion,

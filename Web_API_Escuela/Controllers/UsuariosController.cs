@@ -145,7 +145,7 @@ namespace Web_API_Escuela.Controllers
         {
             //Verificar si el email existe
             var correo = usuarioCreacionDTO.Correo.ToLower();
-            if (await context.Usuarios.AnyAsync(x => x.Correo == correo))
+            if (await context.Usuarios.AnyAsync(x => x.Correo == correo) || await context.Alumnos.AnyAsync(x => x.Correo == correo))
             {
                 return BadRequest("El correo ya existe.");
             }
@@ -155,10 +155,10 @@ namespace Web_API_Escuela.Controllers
             Usuario usuario = new()
             {
                 IdRol = 2, //Docente
-                Nombre = usuarioCreacionDTO.Nombre,
-                ApellidoPaterno = usuarioCreacionDTO.ApellidoPaterno,
-                ApellidoMaterno = usuarioCreacionDTO.ApellidoMaterno,
-                Correo = usuarioCreacionDTO.Correo.ToLower(),
+                Nombre = usuarioCreacionDTO.Nombre.Trim(),
+                ApellidoPaterno = usuarioCreacionDTO.ApellidoPaterno.Trim(),
+                ApellidoMaterno = usuarioCreacionDTO.ApellidoMaterno.Trim(),
+                Correo = usuarioCreacionDTO.Correo.ToLower().Trim(),
                 Password_hash = passwordHash,
                 Password_salt = passwordSalt,
                 Estado = true
@@ -178,7 +178,7 @@ namespace Web_API_Escuela.Controllers
         {
             //Verificar si el email existe
             var correo = usuarioCreacionDTO.Correo.ToLower();
-            if (await context.Usuarios.AnyAsync(x => x.Correo == correo))
+            if (await context.Usuarios.AnyAsync(x => x.Correo == correo) || await context.Alumnos.AnyAsync(x => x.Correo == correo))
             {
                 return BadRequest("El correo ya existe.");
             }
@@ -188,10 +188,10 @@ namespace Web_API_Escuela.Controllers
             Usuario usuario = new()
             {
                 IdRol = 1, //Administrador
-                Nombre = usuarioCreacionDTO.Nombre,
-                ApellidoPaterno = usuarioCreacionDTO.ApellidoPaterno,
-                ApellidoMaterno = usuarioCreacionDTO.ApellidoMaterno,
-                Correo = usuarioCreacionDTO.Correo.ToLower(),
+                Nombre = usuarioCreacionDTO.Nombre.Trim(),
+                ApellidoPaterno = usuarioCreacionDTO.ApellidoPaterno.Trim(),
+                ApellidoMaterno = usuarioCreacionDTO.ApellidoMaterno.Trim(),
+                Correo = usuarioCreacionDTO.Correo.ToLower().Trim(),
                 Password_hash = passwordHash,
                 Password_salt = passwordSalt,
                 Estado = true

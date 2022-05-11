@@ -73,6 +73,52 @@ namespace Web_API_Escuela.Controllers
 
         }
 
+        //POST : api/login/general
+        [HttpPost("general")]
+        public async Task<ActionResult<RespuestaAutenticacionDTO>> General(LoginUsuarioDTO model)
+        {
+            var correo = model.Correo.ToLower();
+
+            //buscar en que tabla se encuentra (usuarios/alumnos)
+            var usuario = await context.Usuarios.FirstOrDefaultAsync(x => x.Correo == correo && x.Estado == true);
+
+            if (usuario == null) 
+            {
+                
+                //Si no existe, busco en la de alumnos
+                var alumno = await context.Alumnos.Include(x => x.Grupo).FirstOrDefaultAsync(x => x.Correo == correo && x.Estado == true);
+
+                if (alumno == null)
+                {
+                    return BadRequest("El usuario no existe.");
+                }
+                else
+                {
+                    ////Pasos en caso de ser alumno////
+                    //Verifico contraseña
+                    if (!VerificarPasswordHash(model.Password, alumno.Password_hash, alumno.Password_salt))
+                    {
+                        return BadRequest("Login incorrecto");
+                    }
+
+                    return ConstruirTokenAlumno(alumno);
+
+                }
+
+            }
+
+            ////Pasos en caso de ser Administrador/Profesor////
+
+            //Verififcar contraseña 
+            if (!VerificarPasswordHash(model.Password, usuario.Password_hash, usuario.Password_salt))
+            {
+                return BadRequest("Login incorrecto");
+            }
+
+            return ConstruirToken(usuario);
+        }
+
+
         [Authorize]
         [HttpGet("DatosUsuario/{idUsuario:int}/{rol}")]
         public async Task<ActionResult<DatosUsuarioDTO>> DatosUsuario([FromRoute] int idUsuario, string rol)
@@ -203,6 +249,7 @@ namespace Web_API_Escuela.Controllers
                 Nombre = usuario.Nombre,
                 ApellidoPaterno = usuario.ApellidoPaterno,
                 ApellidoMaterno = usuario.ApellidoMaterno,
+                Rol = usuario.IdRol == 1 ? "Administrador" : "Docente" ,
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 Expiracion = expires
             };
@@ -233,10 +280,17 @@ namespace Web_API_Escuela.Controllers
                 Nombre = alumno.Nombre,
                 ApellidoPaterno = alumno.ApellidoPaterno,
                 ApellidoMaterno = alumno.ApellidoMaterno,
+                Rol = "Alumno",
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 Expiracion = expires
             };
         }
+
+
+
+
+
+
 
         private bool VerificarPasswordHash(string password, byte[] passwordHashAlmacenado, byte[] passwordSalt)
         {
