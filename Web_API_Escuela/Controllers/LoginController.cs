@@ -248,6 +248,10 @@ namespace Web_API_Escuela.Controllers
                 return new ReadOnlySpan<byte>(passwordHashAlmacenado).SequenceEqual(new ReadOnlySpan<byte>(passwordHashNuevo)); //Compara
             }
         }
+
+        //Crear función de login para unir el de alumno y administrativos a si como controlar el alamacenamiento de estos
+        //para que no este el mismo correo en las tablas y modificar frontend.
+
     }
 
 
