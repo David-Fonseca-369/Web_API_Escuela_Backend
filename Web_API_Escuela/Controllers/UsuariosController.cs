@@ -40,6 +40,8 @@ namespace Web_API_Escuela.Controllers
                 ApellidoPaterno = x.ApellidoPaterno,
                 ApellidoMaterno = x.ApellidoMaterno,
                 Correo = x.Correo,
+
+
                 Estado = x.Estado
             }).ToList();
         }
